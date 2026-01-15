@@ -20,6 +20,12 @@ extern parameter_t * Parameter_List[2];
 extern Flash_para Global_parameter;
 
 
+/*****************************************************************************************************
+
+																							method
+
+******************************************************************************************************/
+
 /*******************************************************************
  * @name       :void GUI_DrawPoint(uint16_t x,uint16_t y,uint16_t color)
  * @date       :2018-08-09 
@@ -983,30 +989,13 @@ void LcdDisplay(uint8_t Row,uint8_t *str)
 }
 
 
-/*********************************************************************
--
 
--
-**********************************************************************/
-const unsigned char BMP1[]=
-{0x00,0x01,0x00,0x03,0x00,0x03,0x00,0x06,0x00,0x0C,
-	0x00,0x08,0x00,0x18,0x40,0x30,0x60,0x60,0x30,0xC0,
-0x19,0x80,0x0B,0x00,0x0F,0x00,0x06,0x00,0x04,0x00,0x00,0x00};/*"未命名文件",0*/
+/*****************************************************************************************************
 
-void draw_tick(uint16_t x,uint16_t y)
-{
-	
-	Gui_Drawbmp16(0,100,BMP1);
+																							menu
 
-}
+******************************************************************************************************/
 
-/*//-------------------------------------------------------------------------------------------
-
-menu
-
-
-
-//-------------------------------------------------------------------------------------------*/
 
 void LCD_DrawString(uint16_t x,uint16_t y,const char*p,uint8_t size,uint16_t color,uint16_t bc)
 {
@@ -1178,54 +1167,70 @@ void drawScrollMenu(u16 x,u16 y, u8 size)
  void drawManualTestMenu(void) {
     LCD_Clear(0xffff);
     LCD_DrawString(30, 0, "Manual Test", 16, RED,WHITE);
-		LCD_DrawString(5, 20, "RSSI:", 16, BLACK,WHITE);
-		LCD_DrawString(90, 20, "LQ:", 16, BLACK,WHITE);
+		if(Get_normal_or_pwm()==1)
+		{
+				LCD_DrawString(5, 20, "RSSI:", 16, BLACK,WHITE);
+				LCD_DrawString(90, 20, "LQ:", 16, BLACK,WHITE);
 
-	 if((((*current_rx_target)>>1)&(0x01))==1) 
-		 {
+			 if((((*current_rx_target)>>1)&(0x01))==1) 
+				 {
 
-		 LCD_DrawString(90, 40, "Vb:", 16, BLACK,WHITE);
-		 }		 
-	 if((((*current_rx_target)>>2)&(0x01))==1) 
-		 {
-			LCD_DrawString(5, 40, "ALT:", 16, BLACK,WHITE);
-		 }		 
+				 LCD_DrawString(90, 40, "Vb:", 16, BLACK,WHITE);
+				 }		 
+			 if((((*current_rx_target)>>2)&(0x01))==1) 
+				 {
+					LCD_DrawString(5, 40, "ALT:", 16, BLACK,WHITE);
+				 }		 
 
-	 switch(((*current_rx_target)>>5)&(0xf)) 		 
-		 {
-			case 4:
-		 	LCD_DrawString(5, 60, "ch1:", 16, BLACK,WHITE);
-			LCD_DrawString(90, 60, "ch2:", 16, BLACK,WHITE);			
-			LCD_DrawString(5, 75, "ch3:", 16, BLACK,WHITE);
-			LCD_DrawString(90, 75, "ch4:", 16, BLACK,WHITE);
-			break;
-			case 6:
-		 	LCD_DrawString(5, 60, "ch1:", 16, BLACK,WHITE);
-			LCD_DrawString(90, 60, "ch2:", 16, BLACK,WHITE);			
-			LCD_DrawString(5, 75, "ch3:", 16, BLACK,WHITE);
-			LCD_DrawString(90, 75, "ch4:", 16, BLACK,WHITE);				
-			
-			LCD_DrawString(5, 90, "ch5:", 16, BLACK,WHITE);
-			LCD_DrawString(90, 90, "ch6:", 16, BLACK,WHITE);
-			break;
-			case 8:	
-		 	LCD_DrawString(5, 60, "ch1:", 16, BLACK,WHITE);
-			LCD_DrawString(90, 60, "ch2:", 16, BLACK,WHITE);			
-			LCD_DrawString(5, 75, "ch3:", 16, BLACK,WHITE);
-			LCD_DrawString(90, 75, "ch4:", 16, BLACK,WHITE);				
-			LCD_DrawString(5, 90, "ch5:", 16, BLACK,WHITE);
-			LCD_DrawString(90, 90, "ch6:", 16, BLACK,WHITE);
-			LCD_DrawString(5, 105, "ch7:", 16, BLACK,WHITE);
-			LCD_DrawString(90, 105, "ch8:", 16, BLACK,WHITE);					
-			break;
-			case 14:	
-		 	LCD_DrawString(5, 60, "ch1:", 12, BLACK,WHITE);	LCD_DrawString(65, 60, "ch2:", 12, BLACK,WHITE);LCD_DrawString(115, 60, "ch3:", 12, BLACK,WHITE);
-			LCD_DrawString(5, 72, "ch4:", 12, BLACK,WHITE);	LCD_DrawString(65, 72, "ch5:", 12, BLACK,WHITE);LCD_DrawString(115, 72, "ch6:", 12, BLACK,WHITE);
-			LCD_DrawString(5, 84, "ch7:", 12, BLACK,WHITE);	LCD_DrawString(65, 84, "ch8:", 12, BLACK,WHITE);LCD_DrawString(115, 84, "ch9:", 12, BLACK,WHITE);
-			LCD_DrawString(5, 96, "ch10:", 12, BLACK,WHITE);LCD_DrawString(65, 96, "ch11:", 12, BLACK,WHITE);LCD_DrawString(115, 96, "ch12:", 12, BLACK,WHITE);
-			LCD_DrawString(5, 108, "ch13:", 12, BLACK,WHITE);LCD_DrawString(65, 108, "ch14:", 12, BLACK,WHITE);
-			break;				
-		 }		 
+			 switch(((*current_rx_target)>>5)&(0xf)) 		 
+				 {
+					case 4:
+					LCD_DrawString(5, 60, "ch1:", 16, BLACK,WHITE);
+					LCD_DrawString(90, 60, "ch2:", 16, BLACK,WHITE);			
+					LCD_DrawString(5, 75, "ch3:", 16, BLACK,WHITE);
+					LCD_DrawString(90, 75, "ch4:", 16, BLACK,WHITE);
+					break;
+					case 6:
+					LCD_DrawString(5, 60, "ch1:", 16, BLACK,WHITE);
+					LCD_DrawString(90, 60, "ch2:", 16, BLACK,WHITE);			
+					LCD_DrawString(5, 75, "ch3:", 16, BLACK,WHITE);
+					LCD_DrawString(90, 75, "ch4:", 16, BLACK,WHITE);				
+					
+					LCD_DrawString(5, 90, "ch5:", 16, BLACK,WHITE);
+					LCD_DrawString(90, 90, "ch6:", 16, BLACK,WHITE);
+					break;
+					case 8:	
+					LCD_DrawString(5, 60, "ch1:", 16, BLACK,WHITE);
+					LCD_DrawString(90, 60, "ch2:", 16, BLACK,WHITE);			
+					LCD_DrawString(5, 75, "ch3:", 16, BLACK,WHITE);
+					LCD_DrawString(90, 75, "ch4:", 16, BLACK,WHITE);				
+					LCD_DrawString(5, 90, "ch5:", 16, BLACK,WHITE);
+					LCD_DrawString(90, 90, "ch6:", 16, BLACK,WHITE);
+					LCD_DrawString(5, 105, "ch7:", 16, BLACK,WHITE);
+					LCD_DrawString(90, 105, "ch8:", 16, BLACK,WHITE);					
+					break;
+					case 14:	
+					LCD_DrawString(5, 60, "ch1:", 12, BLACK,WHITE);	LCD_DrawString(65, 60, "ch2:", 12, BLACK,WHITE);LCD_DrawString(115, 60, "ch3:", 12, BLACK,WHITE);
+					LCD_DrawString(5, 72, "ch4:", 12, BLACK,WHITE);	LCD_DrawString(65, 72, "ch5:", 12, BLACK,WHITE);LCD_DrawString(115, 72, "ch6:", 12, BLACK,WHITE);
+					LCD_DrawString(5, 84, "ch7:", 12, BLACK,WHITE);	LCD_DrawString(65, 84, "ch8:", 12, BLACK,WHITE);LCD_DrawString(115, 84, "ch9:", 12, BLACK,WHITE);
+					LCD_DrawString(5, 96, "ch10:", 12, BLACK,WHITE);LCD_DrawString(65, 96, "ch11:", 12, BLACK,WHITE);LCD_DrawString(115, 96, "ch12:", 12, BLACK,WHITE);
+					LCD_DrawString(5, 108, "ch13:", 12, BLACK,WHITE);LCD_DrawString(65, 108, "ch14:", 12, BLACK,WHITE);
+					break;				 
+				 }				
+			}
+		else if(Get_normal_or_pwm()==0)
+		{
+				LCD_DrawString(5, 20, "1RSSI:", 16, BLACK,WHITE);    LCD_DrawString(90, 20, "1LQ:", 16, BLACK,WHITE);		
+				LCD_DrawString(5, 36, "1RQLY:", 16, BLACK,WHITE);    LCD_DrawString(90, 36, "1TQLY:", 16, BLACK,WHITE);		
+
+				LCD_DrawString(5, 56, "2RSSI:", 16, BLACK,WHITE);    LCD_DrawString(90, 56, "2LQ:", 16, BLACK,WHITE);		
+				LCD_DrawString(5, 72, "2RQLY:", 16, BLACK,WHITE);    LCD_DrawString(90, 72, "2TQLY:", 16, BLACK,WHITE);							
+
+				LCD_DrawString(5, 92, "3RSSI:", 16, BLACK,WHITE);    LCD_DrawString(90, 92, "3LQ:", 16, BLACK,WHITE);		
+				LCD_DrawString(5, 108, "3RQLY:", 16, BLACK,WHITE);    LCD_DrawString(90, 108, "3TQLY:", 16, BLACK,WHITE);										
+		}
+	 
+	 
 	
 
 }
@@ -1466,7 +1471,14 @@ extern TaskHandle_t RX_TESTTask_Handle;
 							{
 								current_rx_target=&SuperP;							
 							}
-							
+							if(menuState.currentIndex==5)
+							{
+								current_rx_target=&SuperXnano;							
+							}
+							if(menuState.currentIndex==6)
+							{
+								current_rx_target=&SuperD;							
+							}								
 						Global_parameter.RX_device_t=current_rx_target;
 							LCD_DrawFillRectangle_color(10, 40, 150, 90,GRAY);
 							LCD_DrawString(35, 60, "saving...", 16, 0x0000,GRAY);

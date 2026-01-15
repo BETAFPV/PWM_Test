@@ -31,6 +31,7 @@
 #include "device.h"
 #include "flash.h"
 #include "pwm_freq.h"
+#include "crfs.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -276,201 +277,25 @@ u8 i=0;
 extern Flash_para Global_parameter;
 extern unsigned char LINK_CONNECT_STATIC;
 extern RX_Device_t PWM_RX;//接收机实体
+extern crsfLinkStatistics_t RX1_telemtering;
+extern crsfLinkStatistics_t RX2_telemtering;
+extern crsfLinkStatistics_t RX3_telemtering;
+extern crsfLinkStatistics_t RX4_telemtering;
+u16 td1;
 void RX_TEST_MANUL_Task_Fun(void const * argument)
 {
-		u16 Channle_color;
-	u16 ALT_color;
-	u16 Vbat_color;
+
+	
   for(;;)
   {
 		if(Test_Ready==1)
 		{
 			while(test_mode==2)
 			{
-				if(LINK_CONNECT_STATIC==1)
-				{
-						if(PWM_RX.RSSI<Global_parameter.RSSI_threshold)
-						{
-							LCD_ShowNum_Color(55,20	,GREEN,WHITE,PWM_RX.RSSI,3,16);								
-						}
-						else
-						{
-							LCD_ShowNum_Color(55,20	,RED,WHITE,PWM_RX.RSSI,3,16);					
-						}
-						if(PWM_RX.LQ>Global_parameter.LQ_threshold)
-						{
-							LCD_ShowNum_Color(125,20	,GREEN,WHITE,PWM_RX.LQ,3,16);								
-						}
-						else
-						{
-							LCD_ShowNum_Color(125,20	,RED,WHITE,PWM_RX.LQ,3,16);					
-						}		
+				
+//				td1=*current_rx_target&0x8000;
+					Manual_test_display();
 
-						
-					 if((((*current_rx_target)>>1)&(0x01))==1) 
-						 {
-
-//						 LCD_ShowFloat(115,40,PWM_RX.Vbat,RED,WHITE,16,0);
-						if((PWM_RX.Vbat>4.5)&(PWM_RX.Vbat<5.2))
-							{
-							Vbat_color=GREEN;
-							}
-								
-							else 
-							{
-								Vbat_color=RED;
-							}
-							LCD_ShowFloat(115,40,PWM_RX.Vbat,Vbat_color,WHITE,16,0);
-						 }		 
-					 if((((*current_rx_target)>>2)&(0x01))==1) 
-						 {
-							
-							if(CRSF_FRAMETYPE_BARO_ALTITUDE_static>=1)
-							{
-								ALT_color=GREEN;
-							}
-							else
-							{
-								ALT_color=RED;
-							}
-							LCD_ShowFloat(40,40,PWM_RX.ALT,ALT_color,WHITE,16,0);
-//							LCD_ShowFloat(40,40,PWM_RX.ALT,GREEN,WHITE,16,0);
-
-						 }		
-
-
-						 
-						switch(((*current_rx_target)>>5)&(0xf)) 		 
-					 {
-						case 4:
-						Channle_color=PWM_RX.Channle.CH1/5*10000;
-						LCD_ShowNum_Color(55,60	,Channle_color,WHITE,PWM_RX.Channle.CH1,2,16);
-						Channle_color=PWM_RX.Channle.CH2/5*10000;
-						LCD_ShowNum_Color(135,60	,Channle_color,WHITE,PWM_RX.Channle.CH2,2,16);
-						Channle_color=PWM_RX.Channle.CH3/5*10000;		
-						LCD_ShowNum_Color(55,75	,Channle_color,WHITE,PWM_RX.Channle.CH3,2,16);
-						Channle_color=PWM_RX.Channle.CH4/5*10000;
-						LCD_ShowNum_Color(135,75	,Channle_color,WHITE,PWM_RX.Channle.CH4,2,16);
-						break;
-						case 6:
-						Channle_color=PWM_RX.Channle.CH1/5*10000;
-						LCD_ShowNum_Color(55,60	,Channle_color,WHITE,PWM_RX.Channle.CH1,2,16);
-						Channle_color=PWM_RX.Channle.CH2/5*10000;
-						LCD_ShowNum_Color(135,60	,Channle_color,WHITE,PWM_RX.Channle.CH2,2,16);
-						Channle_color=PWM_RX.Channle.CH3/5*10000;		
-						LCD_ShowNum_Color(55,75	,Channle_color,WHITE,PWM_RX.Channle.CH3,2,16);
-						Channle_color=PWM_RX.Channle.CH4/5*10000;
-						LCD_ShowNum_Color(135,75	,Channle_color,WHITE,PWM_RX.Channle.CH4,2,16);
-						Channle_color=PWM_RX.Channle.CH5/5*10000;		
-						LCD_ShowNum_Color(55,90	,Channle_color,WHITE,PWM_RX.Channle.CH5,2,16);
-						Channle_color=PWM_RX.Channle.CH6/5*10000;
-						LCD_ShowNum_Color(135,90	,Channle_color,WHITE,PWM_RX.Channle.CH6,2,16);							
-						break;
-						case 8:	
-						Channle_color=PWM_RX.Channle.CH1/5*10000;
-						LCD_ShowNum_Color(55,60	,Channle_color,WHITE,PWM_RX.Channle.CH1,2,16);
-						Channle_color=PWM_RX.Channle.CH2/5*10000;
-						LCD_ShowNum_Color(135,60	,Channle_color,WHITE,PWM_RX.Channle.CH2,2,16);
-						Channle_color=PWM_RX.Channle.CH3/5*10000;		
-						LCD_ShowNum_Color(55,75	,Channle_color,WHITE,PWM_RX.Channle.CH3,2,16);
-						Channle_color=PWM_RX.Channle.CH4/5*10000;
-						LCD_ShowNum_Color(135,75	,Channle_color,WHITE,PWM_RX.Channle.CH4,2,16);
-						Channle_color=PWM_RX.Channle.CH5/5*10000;		
-						LCD_ShowNum_Color(55,90	,Channle_color,WHITE,PWM_RX.Channle.CH5,2,16);
-						Channle_color=PWM_RX.Channle.CH6/5*10000;
-						LCD_ShowNum_Color(135,90	,Channle_color,WHITE,PWM_RX.Channle.CH6,2,16);	
-						Channle_color=PWM_RX.Channle.CH7/5*10000;
-						LCD_ShowNum_Color(55,105	,Channle_color,WHITE,PWM_RX.Channle.CH7,2,16);
-						Channle_color=PWM_RX.Channle.CH8/5*10000;
-						LCD_ShowNum_Color(135,105	,Channle_color,WHITE,PWM_RX.Channle.CH8,2,16);							
-						break;
-						case 14:	
-						Channle_color=PWM_RX.Channle.CH1/5*10000;
-						LCD_ShowNum_Color(35,60	,Channle_color,WHITE,PWM_RX.Channle.CH1,2,12);
-						Channle_color=PWM_RX.Channle.CH2/5*10000;
-						LCD_ShowNum_Color(95,60	,Channle_color,WHITE,PWM_RX.Channle.CH2,2,12);
-						Channle_color=PWM_RX.Channle.CH3/5*10000;		
-						LCD_ShowNum_Color(145,60	,Channle_color,WHITE,PWM_RX.Channle.CH3,2,12);
-						
-						Channle_color=PWM_RX.Channle.CH4/5*10000;
-						LCD_ShowNum_Color(35,72	,Channle_color,WHITE,PWM_RX.Channle.CH4,2,12);
-						Channle_color=PWM_RX.Channle.CH5/5*10000;		
-						LCD_ShowNum_Color(95,72	,Channle_color,WHITE,PWM_RX.Channle.CH5,2,12);
-						Channle_color=PWM_RX.Channle.CH6/5*10000;
-						LCD_ShowNum_Color(145,72	,Channle_color,WHITE,PWM_RX.Channle.CH6,2,12);	
-						
-						Channle_color=PWM_RX.Channle.CH7/5*10000;
-						LCD_ShowNum_Color(35,86	,Channle_color,WHITE,PWM_RX.Channle.CH7,2,12);
-						Channle_color=PWM_RX.Channle.CH8/5*10000;
-						LCD_ShowNum_Color(95,86	,Channle_color,WHITE,PWM_RX.Channle.CH8,2,12);
-						Channle_color=PWM_RX.Channle.CH9/5*10000;
-						LCD_ShowNum_Color(145,86	,Channle_color,WHITE,PWM_RX.Channle.CH9,2,12);
-
-						Channle_color=PWM_RX.Channle.CH10/5*10000;
-						LCD_ShowNum_Color(35,98	,Channle_color,WHITE,PWM_RX.Channle.CH10,2,12);
-						Channle_color=PWM_RX.Channle.CH11/5*10000;
-						LCD_ShowNum_Color(95,98	,Channle_color,WHITE,PWM_RX.Channle.CH11,2,12);
-						Channle_color=PWM_RX.Channle.CH12/5*10000;
-						LCD_ShowNum_Color(145,98	,Channle_color,WHITE,PWM_RX.Channle.CH12,2,12);
-					
-						break;
-					 }		
-									
-//				
-				}
-				else
-				{
-						LCD_ShowNum_Color(55,20	,RED,WHITE,0,3,16);
-						LCD_ShowNum_Color(125,20	,RED,WHITE,0,3,16);
-						
-					 if((((*current_rx_target)>>1)&(0x01))==1) 
-						 {
-
-						 LCD_ShowFloat(115,40,0,RED,WHITE,16,0);
-
-						 }		 
-					 if((((*current_rx_target)>>2)&(0x01))==1) 
-						 {
-
-							LCD_ShowFloat(40,40,0,RED,WHITE,16,0);
-
-						 }						
-						switch(((*current_rx_target)>>5)&(0xf)) 		 
-					 {
-						case 4:
-						LCD_ShowNum_Color(55,60	,RED,WHITE,0,2,16);
-						LCD_ShowNum_Color(135,60	,RED,WHITE,0,2,16);
-						LCD_ShowNum_Color(55,75	,RED,WHITE,0,2,16);
-						LCD_ShowNum_Color(135,75	,RED,WHITE,0,2,16);
-						break;
-						case 6:
-						LCD_ShowNum_Color(55,60	,RED,WHITE,0,2,16);
-						LCD_ShowNum_Color(135,60	,RED,WHITE,0,2,16);
-						LCD_ShowNum_Color(55,75	,RED,WHITE,0,2,16);
-						LCD_ShowNum_Color(135,75	,RED,WHITE,0,2,16);
-						LCD_ShowNum_Color(55,90	,RED,WHITE,0,2,16);
-						LCD_ShowNum_Color(135,90	,RED,WHITE,0,2,16);							
-						break;
-						case 8:	
-						LCD_ShowNum_Color(55,60	,RED,WHITE,0,2,16);
-						LCD_ShowNum_Color(135,60	,RED,WHITE,0,2,16);
-						LCD_ShowNum_Color(55,75	,RED,WHITE,0,2,16);
-						LCD_ShowNum_Color(135,75	,RED,WHITE,0,2,16);
-						LCD_ShowNum_Color(55,90	,RED,WHITE,0,2,16);
-						LCD_ShowNum_Color(135,90	,RED,WHITE,0,2,16);	
-						LCD_ShowNum_Color(55,105	,RED,WHITE,0,2,16);
-						LCD_ShowNum_Color(135,105	,RED,WHITE,0,2,16);							
-						break;
-						case 14:	
-						LCD_ShowNum_Color(35,60	,RED,WHITE,0,2,12);LCD_ShowNum_Color(95,60	,RED,WHITE,0,2,12);LCD_ShowNum_Color(145,60	,RED,WHITE,0,2,12);
-						LCD_ShowNum_Color(35,72	,RED,WHITE,0,2,12);LCD_ShowNum_Color(95,72	,RED,WHITE,0,2,12);LCD_ShowNum_Color(145,72	,RED,WHITE,0,2,12);	
-						LCD_ShowNum_Color(35,86	,RED,WHITE,0,2,12);LCD_ShowNum_Color(95,86	,RED,WHITE,0,2,12);LCD_ShowNum_Color(145,86	,RED,WHITE,0,2,12);
-						LCD_ShowNum_Color(35,98	,RED,WHITE,0,2,12);	LCD_ShowNum_Color(95,98	,RED,WHITE,0,2,12);LCD_ShowNum_Color(145,98	,RED,WHITE,0,2,12);
-						LCD_ShowNum_Color(35,110	,RED,WHITE,0,2,12);LCD_ShowNum_Color(95,110	,RED,WHITE,0,2,12);							
-						break;						
-					 }		
-				}
-			
 				osDelay(10);
 			}			
 		}
