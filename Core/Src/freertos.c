@@ -29,6 +29,7 @@
 #include "gui.h"
 #include "USART.h"
 #include "device.h"
+#include "rf_port.h"
 #include "flash.h"
 #include "pwm_freq.h"
 #include "crfs.h"
@@ -159,10 +160,7 @@ void StartDefaultTask(void const * argument)
   /* init code for USB_DEVICE */
   MX_USB_DEVICE_Init();
   /* USER CODE BEGIN StartDefaultTask */
-	
-//	LcdInit();	
-
-		 osThreadDef(BaseTask_1_Handle, BaseTask_1_Fun, osPriorityNormal, 0, 1024);
+			 osThreadDef(BaseTask_1_Handle, BaseTask_1_Fun, osPriorityNormal, 0, 1024);
 		BaseTask_1_Handle = osThreadCreate(osThread(BaseTask_1_Handle), NULL);
 		
 		osThreadDef(BaseTask_2_Handle, BaseTask_2_Fun, osPriorityAboveNormal, 0, 128);
@@ -174,15 +172,14 @@ void StartDefaultTask(void const * argument)
 		osThreadDef(RX_TESTTask_Handle, RX_TEST_Auto_Task_Fun, osPriorityAboveNormal, 0, 2028);
 		RX_TESTTask_Handle = osThreadCreate(osThread(RX_TESTTask_Handle), NULL);
 		vTaskSuspend(RX_TESTTask_Handle);
+	
 		osThreadDef(RX_MANULTask_Handle, RX_TEST_MANUL_Task_Fun, osPriorityAboveNormal, 0, 1024);
 		RX_MANULTask_Handle = osThreadCreate(osThread(RX_MANULTask_Handle), NULL);
 		vTaskSuspend(RX_MANULTask_Handle);	
+	
 		osThreadDef(TransmiterTask_Handle, Transmiter_Task_Fun, osPriorityNormal, 0, 128);
 		TransmiterTask_Handle = osThreadCreate(osThread(TransmiterTask_Handle), NULL);
-		
-
-//	LCD_Clear(RED);
-  /* Infinite loop */
+		  /* Infinite loop */
   for(;;)
   {
 
@@ -202,6 +199,7 @@ void BaseTask_1_Fun(void const * argument)
 	HAL_Delay(300);
   for(;;)
   {
+		PING_TX_INFO();
 		Key_Scan( );
 		Menu_Process();
     osDelay(10);
@@ -223,7 +221,9 @@ void BaseTask_2_Fun(void const * argument)
     osDelay(20);
   }
 }
+u16 channe_target_value_l=300;
 
+u16 channe_target_value_h=2047;
 void BaseTask_3_Fun(void const * argument)
 {
   for(;;)
@@ -281,10 +281,15 @@ extern crsfLinkStatistics_t RX1_telemtering;
 extern crsfLinkStatistics_t RX2_telemtering;
 extern crsfLinkStatistics_t RX3_telemtering;
 extern crsfLinkStatistics_t RX4_telemtering;
+float ch[12]={0};
 u16 td1;
+
 void RX_TEST_MANUL_Task_Fun(void const * argument)
 {
-
+		Pwm_channle_t* ch_struct_p;
+		u16 Channle_color;
+		u16 ALT_color;
+		u16 Vbat_color;
 	
   for(;;)
   {
@@ -293,8 +298,205 @@ void RX_TEST_MANUL_Task_Fun(void const * argument)
 			while(test_mode==2)
 			{
 				
-//				td1=*current_rx_target&0x8000;
-					Manual_test_display();
+				td1=*current_rx_target&0x8000;
+				if((*current_rx_target&0x8000)==Pwm_RX)
+				{
+					if(LINK_CONNECT_STATIC==1)
+					{
+							if(PWM_RX.RSSI<Global_parameter.RSSI_threshold)
+							{
+								LCD_ShowNum_Color(55,20	,GREEN,WHITE,PWM_RX.RSSI,3,16);								
+							}
+							else
+							{
+								LCD_ShowNum_Color(55,20	,RED,WHITE,PWM_RX.RSSI,3,16);					
+							}
+							if(PWM_RX.LQ>Global_parameter.LQ_threshold)
+							{
+								LCD_ShowNum_Color(125,20	,GREEN,WHITE,PWM_RX.LQ,3,16);								
+							}
+							else
+							{
+								LCD_ShowNum_Color(125,20	,RED,WHITE,PWM_RX.LQ,3,16);					
+							}		
+
+							
+						 if((((*current_rx_target)>>1)&(0x01))==1) 
+							 {
+
+	//						 LCD_ShowFloat(115,40,PWM_RX.Vbat,RED,WHITE,16,0);
+							if((PWM_RX.Vbat>4.5)&(PWM_RX.Vbat<5.2))
+								{
+								Vbat_color=GREEN;
+								}
+									
+								else 
+								{
+									Vbat_color=RED;
+								}
+								LCD_ShowFloat(115,40,PWM_RX.Vbat,Vbat_color,WHITE,16,0);
+							 }		 
+						 if((((*current_rx_target)>>2)&(0x01))==1) 
+							 {
+								
+								if(CRSF_FRAMETYPE_BARO_ALTITUDE_static>=1)
+								{
+									ALT_color=GREEN;
+								}
+								else
+								{
+									ALT_color=RED;
+								}
+								LCD_ShowFloat(40,40,PWM_RX.ALT,ALT_color,WHITE,16,0);
+	//							LCD_ShowFloat(40,40,PWM_RX.ALT,GREEN,WHITE,16,0);
+
+							 }		
+
+
+							 uint8_t PWM_Ch_cnt=0; 
+							switch(((*current_rx_target)>>5)&(0xf)) 		 
+						 {
+							case 4:
+							Channle_color=Channle_color_judge(PWM_RX.Channle.CH1);
+							LCD_ShowNum_Color(55,60	,Channle_color,WHITE,PWM_RX.Channle.CH1,2,16);
+							Channle_color=Channle_color_judge(PWM_RX.Channle.CH2);
+							LCD_ShowNum_Color(135,60	,Channle_color,WHITE,PWM_RX.Channle.CH2,2,16);
+							Channle_color=Channle_color_judge(PWM_RX.Channle.CH3);
+							LCD_ShowNum_Color(55,75	,Channle_color,WHITE,PWM_RX.Channle.CH3,2,16);
+							Channle_color=Channle_color_judge(PWM_RX.Channle.CH4);
+							LCD_ShowNum_Color(135,75	,Channle_color,WHITE,PWM_RX.Channle.CH4,2,16);
+							break;
+							case 6:
+							Channle_color=Channle_color_judge(PWM_RX.Channle.CH1);
+							LCD_ShowNum_Color(55,60	,Channle_color,WHITE,PWM_RX.Channle.CH1,2,16);
+							Channle_color=Channle_color_judge(PWM_RX.Channle.CH2);
+							LCD_ShowNum_Color(135,60	,Channle_color,WHITE,PWM_RX.Channle.CH2,2,16);
+							Channle_color=Channle_color_judge(PWM_RX.Channle.CH3);
+							LCD_ShowNum_Color(55,75	,Channle_color,WHITE,PWM_RX.Channle.CH3,2,16);
+							Channle_color=Channle_color_judge(PWM_RX.Channle.CH4);
+							LCD_ShowNum_Color(135,75	,Channle_color,WHITE,PWM_RX.Channle.CH4,2,16);
+							Channle_color=Channle_color_judge(PWM_RX.Channle.CH5);
+							LCD_ShowNum_Color(55,90	,Channle_color,WHITE,PWM_RX.Channle.CH5,2,16);
+							Channle_color=Channle_color_judge(PWM_RX.Channle.CH6);
+							LCD_ShowNum_Color(135,90	,Channle_color,WHITE,PWM_RX.Channle.CH6,2,16);							
+							break;
+							case 8:	
+							Channle_color=Channle_color_judge(PWM_RX.Channle.CH1);
+							LCD_ShowNum_Color(55,60	,Channle_color,WHITE,PWM_RX.Channle.CH1,2,16);
+							Channle_color=Channle_color_judge(PWM_RX.Channle.CH2);
+							LCD_ShowNum_Color(135,60	,Channle_color,WHITE,PWM_RX.Channle.CH2,2,16);
+							Channle_color=Channle_color_judge(PWM_RX.Channle.CH3);
+							LCD_ShowNum_Color(55,75	,Channle_color,WHITE,PWM_RX.Channle.CH3,2,16);
+							Channle_color=Channle_color_judge(PWM_RX.Channle.CH4);
+							LCD_ShowNum_Color(135,75	,Channle_color,WHITE,PWM_RX.Channle.CH4,2,16);
+							Channle_color=Channle_color_judge(PWM_RX.Channle.CH5);
+							LCD_ShowNum_Color(55,90	,Channle_color,WHITE,PWM_RX.Channle.CH5,2,16);
+							Channle_color=Channle_color_judge(PWM_RX.Channle.CH6);
+							LCD_ShowNum_Color(135,90	,Channle_color,WHITE,PWM_RX.Channle.CH6,2,16);	
+							Channle_color=Channle_color_judge(PWM_RX.Channle.CH7);
+							LCD_ShowNum_Color(55,105	,Channle_color,WHITE,PWM_RX.Channle.CH7,2,16);
+							Channle_color=Channle_color_judge(PWM_RX.Channle.CH8);
+							LCD_ShowNum_Color(135,105	,Channle_color,WHITE,PWM_RX.Channle.CH8,2,16);							
+							break;
+							case 14:	
+							Channle_color=Channle_color_judge(PWM_RX.Channle.CH1);
+							LCD_ShowNum_Color(55,45	,Channle_color,WHITE,PWM_RX.Channle.CH1,2,16);
+							Channle_color=Channle_color_judge(PWM_RX.Channle.CH2);
+							LCD_ShowNum_Color(135,45	,Channle_color,WHITE,PWM_RX.Channle.CH2,2,16);
+							Channle_color=Channle_color_judge(PWM_RX.Channle.CH3);
+							LCD_ShowNum_Color(55,60	,Channle_color,WHITE,PWM_RX.Channle.CH3,2,16);
+							
+							Channle_color=Channle_color_judge(PWM_RX.Channle.CH4);
+							LCD_ShowNum_Color(135,60	,Channle_color,WHITE,PWM_RX.Channle.CH4,2,16);
+							Channle_color=Channle_color_judge(PWM_RX.Channle.CH5);
+							LCD_ShowNum_Color(55,75	,Channle_color,WHITE,PWM_RX.Channle.CH5,2,16);
+							Channle_color=Channle_color_judge(PWM_RX.Channle.CH6);
+							LCD_ShowNum_Color(135,75	,Channle_color,WHITE,PWM_RX.Channle.CH6,2,16);	
+							
+							Channle_color=Channle_color_judge(PWM_RX.Channle.CH7);
+							LCD_ShowNum_Color(55,90	,Channle_color,WHITE,PWM_RX.Channle.CH7,2,16);
+							Channle_color=Channle_color_judge(PWM_RX.Channle.CH8);
+							LCD_ShowNum_Color(135,90	,Channle_color,WHITE,PWM_RX.Channle.CH8,2,16);
+							Channle_color=Channle_color_judge(PWM_RX.Channle.CH9);
+							LCD_ShowNum_Color(55,105	,Channle_color,WHITE,PWM_RX.Channle.CH9,2,16);
+
+							Channle_color=Channle_color_judge(PWM_RX.Channle.CH10);
+							LCD_ShowNum_Color(135,105	,Channle_color,WHITE,PWM_RX.Channle.CH10,2,16);
+
+						
+							break;
+						 }		
+										
+	//				
+					}
+					else
+					{
+						uint8_t PWM_Ch_cnt=0; 
+						LCD_ShowNum_Color(55,20	,RED,WHITE,0,3,16);
+						LCD_ShowNum_Color(125,20	,RED,WHITE,0,3,16);
+						
+					 if((((*current_rx_target)>>1)&(0x01))==1) 
+						 {
+
+						 LCD_ShowFloat(115,40,0,RED,WHITE,16,0);
+
+						 }		 
+					 if((((*current_rx_target)>>2)&(0x01))==1) 
+						 {
+
+							LCD_ShowFloat(40,40,0,RED,WHITE,16,0);
+
+						 }						
+						switch(((*current_rx_target)>>5)&(0xf)) 		 
+					 {
+						case 4:
+						LCD_ShowNum_Color(55,60	,RED,WHITE,0,2,16);
+						LCD_ShowNum_Color(135,60	,RED,WHITE,0,2,16);
+						LCD_ShowNum_Color(55,75	,RED,WHITE,0,2,16);
+						LCD_ShowNum_Color(135,75	,RED,WHITE,0,2,16);
+						break;
+						case 6:
+						LCD_ShowNum_Color(55,60	,RED,WHITE,0,2,16);
+						LCD_ShowNum_Color(135,60	,RED,WHITE,0,2,16);
+						LCD_ShowNum_Color(55,75	,RED,WHITE,0,2,16);
+						LCD_ShowNum_Color(135,75	,RED,WHITE,0,2,16);
+						LCD_ShowNum_Color(55,90	,RED,WHITE,0,2,16);
+						LCD_ShowNum_Color(135,90	,RED,WHITE,0,2,16);							
+						break;
+						case 8:	
+						LCD_ShowNum_Color(55,60	,RED,WHITE,0,2,16);
+						LCD_ShowNum_Color(135,60	,RED,WHITE,0,2,16);
+						LCD_ShowNum_Color(55,75	,RED,WHITE,0,2,16);
+						LCD_ShowNum_Color(135,75	,RED,WHITE,0,2,16);
+						LCD_ShowNum_Color(55,90	,RED,WHITE,0,2,16);
+						LCD_ShowNum_Color(135,90	,RED,WHITE,0,2,16);	
+						LCD_ShowNum_Color(55,105	,RED,WHITE,0,2,16);
+						LCD_ShowNum_Color(135,105	,RED,WHITE,0,2,16);							
+						break;
+						case 14:	
+							for(uint8_t i=0;i <5;i++)
+							{
+								for(uint8_t y=0;y <2;y++)
+								{
+									PWM_Ch_cnt++;
+									Channle_color=Channle_color_judge(ch[PWM_Ch_cnt-1]);
+									LCD_ShowNum_Color(55+80*y,45+15*i	,RED,WHITE,ch[PWM_Ch_cnt-1],2,16);
+								
+								}							
+							}
+						break;						
+					 }		
+				}
+				}
+				else if((*current_rx_target&0x8000)==Normal_RX)
+				{
+//					LCD_ShowNum_Color(55,20	,GREEN,WHITE,PWM_RX.RSSI,3,16);
+//					LCD_ShowNum_Color(55,20	,GREEN,WHITE,RX1_telemtering,3,16);	
+//					RX1_telemtering.
+//					RX1_telemtering.
+					
+					
+				}
 
 				osDelay(10);
 			}			
@@ -310,7 +512,7 @@ void Transmiter_Task_Fun(void const * argument)
   for(;;)
   {
 	transmitter_CHANNLE();
-   osDelay(10);
+   osDelay(20);
 		
   }
 }

@@ -1,6 +1,7 @@
 #include "crfs.h"
 #include "usart.h"
 #include "main.h"
+#include "rf_port.h"
 RCDATA_t crsfData;
 
 uint8_t CRSF_RawData_Flag;
@@ -216,37 +217,47 @@ void PacketLinkStatistics(const crsf_header_t *p)
 }
 
 
+extern TX  TX_MODEL;
 uint8_t  *string_data_p;
 uint8_t  string_data[20];
 uint8_t  version_string_data[2];
-uint8_t  indexes_len=0;
+//uint8_t  indexes_len=0;
 
 //uint8_t *CRSF_RawData_point;
+//uint8_t *CRSF_RawData_point;
 
-void PacketDEVICE_INFO(const crsf_header_t *p)
+char *Device_name;
+u8 index_number;
+void Packet_PING_Device_INFO(const crsf_header_t *p)
 {
-
+//	u8 length=CRSF_RawData_4[1];
+//	Device_name=&CRSF_RawData_4[5];
+//	index_number=CRSF_RawData_4[length-1];
+	
 	uint8_t  string_data_len;
-	string_data_p=&CRSF_RawData_2[5];
+	string_data_p=&CRSF_RawData_4[5];
 	strcpy(string_data, string_data_p);//高频头命名
 	string_data_len=strlen (string_data);
-	version_string_data[0]=CRSF_RawData_2[5+string_data_len+10];//elrs版本号
-	version_string_data[1]=CRSF_RawData_2[5+string_data_len+11];
-	indexes_len=CRSF_RawData_2[p->frame_size-1];//索引数量
+	version_string_data[0]=CRSF_RawData_4[5+string_data_len+10];//elrs版本号
+	version_string_data[1]=CRSF_RawData_4[5+string_data_len+11];
+	index_number=CRSF_RawData_4[p->frame_size-1];//索引数量
+	TX_MODEL.index_num=index_number;
 	
 }
 
+uint8_t BIND_indexes_num=0;
 
-uint8_t BIND_indexes_num;
 void PacketPARAMETER_INFO(const crsf_header_t *p)
 {
 
 	uint8_t  string_data_len;
-	string_data_p=&CRSF_RawData_2[9];
+	string_data_p=&CRSF_RawData_4[9];
+	
 	if(strstr(string_data_p,"Bind"))//寻找BIND的索引
 	{
-		BIND_indexes_num=CRSF_RawData_2[5];
+		BIND_indexes_num=CRSF_RawData_4[5];
 		strcpy(string_data, string_data_p);
+		
 	
 	}
 	else
@@ -399,7 +410,7 @@ void ProcessPacketIn(uint8_t len)
 										case CRSF_FRAMETYPE_MSP_WRITE:
 												break;
 										case CRSF_FRAMETYPE_DEVICE_INFO:
-												PacketDEVICE_INFO(hdr4);
+												Packet_PING_Device_INFO(hdr4);
 												break;
 										case CRSF_FRAMETYPE_PARAMETER_SETTINGS_ENTRY://2B
 												PacketPARAMETER_INFO(hdr4);

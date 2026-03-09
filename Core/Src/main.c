@@ -118,14 +118,16 @@ int main(void)
   MX_USART1_UART_Init();
   MX_USART3_UART_Init();
   MX_SPI1_Init();
-  MX_TIM1_Init();
   MX_TIM2_Init();
   MX_TIM3_Init();
   MX_TIM4_Init();
   MX_TIM6_Init();
   MX_TIM7_Init();
   MX_UART4_Init();
-  MX_IWDG_Init();
+//  MX_IWDG_Init();
+  MX_TIM12_Init();
+  MX_UART5_Init();
+  MX_USART6_UART_Init();
   /* USER CODE BEGIN 2 */
 	Flash_para_init();
 	Crc8_init(0xD5);
@@ -138,7 +140,8 @@ int main(void)
 	__HAL_UART_ENABLE_IT(&huart2,UART_IT_IDLE);
 	__HAL_UART_ENABLE_IT(&huart3,UART_IT_IDLE);
 	__HAL_UART_ENABLE_IT(&huart4,UART_IT_IDLE);
-
+	__HAL_UART_ENABLE_IT(&huart5,UART_IT_IDLE);
+	__HAL_UART_ENABLE_IT(&huart6,UART_IT_IDLE);
 		
   /* USER CODE END 2 */
 

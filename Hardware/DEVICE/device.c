@@ -16,16 +16,16 @@ extern u8 test_step;
 //enum RX RX_Device=RX6; 
 extern TaskHandle_t RX_TESTTask_Handle;
 extern TaskHandle_t RX_MANULTask_Handle;
+enum Test_Err RX_Test_ErrINFO;
 enum device_Err device_ErrINFO;
 extern RX_Device_t PWM_RX;//接收机实体
 extern u16 channe_target_value;
-extern TIM_HandleTypeDef htim1;
+extern TIM_HandleTypeDef htim12;
 extern TIM_HandleTypeDef htim2;
 extern TIM_HandleTypeDef htim3;
 extern TIM_HandleTypeDef htim4;
 extern TIM_HandleTypeDef htim6;
 extern TIM_HandleTypeDef htim7;
-extern unsigned char LINK_CONNECT_STATIC;
 extern float channe_target_fre;
 Test_Err_struct Test_Err_Global={0};
 extern u8 CRSF_FRAMETYPE_BARO_ALTITUDE_static;
@@ -46,12 +46,16 @@ Rx_target SuperD,SuperXnano,SuperXmono=0;//rx接收机
 Rx_target * current_rx_target;
 
 
+
+//初始全局参数
 Flash_para Global_init_parameter={0,33,99,1};
 Flash_para Global_parameter={0};
 
+//全局参数实例
 parameter_t RSSI_th={"RSSI_t",3,&Global_parameter.RSSI_threshold};
 parameter_t LQ_th={"LQ_t",3,&Global_parameter.LQ_threshold};
 
+//全局参数列表
 #define parameter_number 2
 parameter_t * Parameter_List[parameter_number]=
 {
@@ -61,11 +65,7 @@ parameter_t * Parameter_List[parameter_number]=
 };
 
 
-/*****************************************************************************************************
-
-																							TEST
-
-******************************************************************************************************/
+///////////////////////////////////////////////////////////////////
 
 
 void Start_Auto_Test()//开始自动测试
@@ -74,8 +74,8 @@ void Start_Auto_Test()//开始自动测试
 		CRSF_FRAMETYPE_BARO_ALTITUDE_static=0;
 		PWM_RX.RSSI=0;
 		PWM_RX.LQ=0;
-		HAL_TIM_IC_Start_IT(&htim1,TIM_CHANNEL_1);
-    HAL_TIM_IC_Start_IT(&htim1,TIM_CHANNEL_2);
+		HAL_TIM_IC_Start_IT(&htim12,TIM_CHANNEL_1);
+    HAL_TIM_IC_Start_IT(&htim12,TIM_CHANNEL_2);
 //    HAL_TIM_IC_Start_IT(&htim2,TIM_CHANNEL_3);
 //    HAL_TIM_IC_Start_IT(&htim2,TIM_CHANNEL_4);
 
@@ -104,10 +104,10 @@ void Start_Auto_Test()//开始自动测试
 
 void Stop_Auto_Test()//结束自动测试
 {
-		HAL_TIM_IC_Stop_IT(&htim1,TIM_CHANNEL_1);
-    HAL_TIM_IC_Stop_IT(&htim1,TIM_CHANNEL_2);
+		HAL_TIM_IC_Stop_IT(&htim12,TIM_CHANNEL_1);
+//    HAL_TIM_IC_Stop_IT(&htim12,TIM_CHANNEL_2);
 //    HAL_TIM_IC_Start_IT(&htim2,TIM_CHANNEL_3);
-//    HAL_TIM_IC_Start_IT(&htim2,TIM_CHANNEL_4);
+    HAL_TIM_IC_Start_IT(&htim2,TIM_CHANNEL_4);
 
 	  HAL_TIM_IC_Stop_IT(&htim2,TIM_CHANNEL_1);
     HAL_TIM_IC_Stop_IT(&htim2,TIM_CHANNEL_2);
@@ -131,15 +131,13 @@ void Stop_Auto_Test()//结束自动测试
 
 void Start_Manual_Test()//开始手动测试
 {
-			HAL_TIM_IC_Start_IT(&htim1,TIM_CHANNEL_1);
-    HAL_TIM_IC_Start_IT(&htim1,TIM_CHANNEL_2);
-//    HAL_TIM_IC_Start_IT(&htim2,TIM_CHANNEL_3);
-//    HAL_TIM_IC_Start_IT(&htim2,TIM_CHANNEL_4);
+			HAL_TIM_IC_Start_IT(&htim12,TIM_CHANNEL_1);
+    HAL_TIM_IC_Start_IT(&htim12,TIM_CHANNEL_4);
+
 
 	  HAL_TIM_IC_Start_IT(&htim2,TIM_CHANNEL_1);
     HAL_TIM_IC_Start_IT(&htim2,TIM_CHANNEL_2);
-//    HAL_TIM_IC_Start_IT(&htim2,TIM_CHANNEL_3);
-//    HAL_TIM_IC_Start_IT(&htim2,TIM_CHANNEL_4);
+
 
     HAL_TIM_IC_Start_IT(&htim3,TIM_CHANNEL_1);
     HAL_TIM_IC_Start_IT(&htim3,TIM_CHANNEL_2);
@@ -160,10 +158,10 @@ void Start_Manual_Test()//开始手动测试
 
 void Stop_Manual_Test()//结束手动测试
 {
-		HAL_TIM_IC_Stop_IT(&htim1,TIM_CHANNEL_1);
-    HAL_TIM_IC_Stop_IT(&htim1,TIM_CHANNEL_2);
+		HAL_TIM_IC_Stop_IT(&htim12,TIM_CHANNEL_1);
+//    HAL_TIM_IC_Stop_IT(&htim12,TIM_CHANNEL_2);
 //    HAL_TIM_IC_Start_IT(&htim2,TIM_CHANNEL_3);
-//    HAL_TIM_IC_Start_IT(&htim2,TIM_CHANNEL_4);
+    HAL_TIM_IC_Stop_IT(&htim2,TIM_CHANNEL_4);
 
 	  HAL_TIM_IC_Stop_IT(&htim2,TIM_CHANNEL_1);
     HAL_TIM_IC_Stop_IT(&htim2,TIM_CHANNEL_2);
@@ -317,10 +315,10 @@ u8 Channle_test_display()
 		LCD_ShowNum_Color(50,88	,Channle_color,GRAY,PWM_RX.Channle.CH9,3,12);
 		Channle_color=PWM_RX.Channle.CH10*1000;
 		LCD_ShowNum_Color(120,88	,Channle_color,GRAY,PWM_RX.Channle.CH10,3,12);
-		Channle_color=PWM_RX.Channle.CH11*1000;		
-		LCD_ShowNum_Color(50,100	,Channle_color,GRAY,PWM_RX.Channle.CH11,3,12);
-		Channle_color=PWM_RX.Channle.CH12*1000;
-		LCD_ShowNum_Color(120,100	,Channle_color,GRAY,PWM_RX.Channle.CH12,3,12);
+//		Channle_color=PWM_RX.Channle.CH11*1000;		
+//		LCD_ShowNum_Color(50,100	,Channle_color,GRAY,PWM_RX.Channle.CH11,3,12);
+//		Channle_color=PWM_RX.Channle.CH12*1000;
+//		LCD_ShowNum_Color(120,100	,Channle_color,GRAY,PWM_RX.Channle.CH12,3,12);
 //		Channle_color=PWM_RX.Channle.CH5*1000;		
 //		LCD_ShowNum_Color(50,70	,Channle_color,GRAY,PWM_RX.Channle.CH5,3,12);
 //		Channle_color=PWM_RX.Channle.CH6*1000;
@@ -329,208 +327,20 @@ u8 Channle_test_display()
 	 }
 }
 
-void Manual_test_display()
+u16 Channle_color_judge(float ch_value)
 {
-			u16 Channle_color;
-		u16 ALT_color;
-		u16 Vbat_color;
-				if(Get_normal_or_pwm()==1)
-				{
-					if(LINK_CONNECT_STATIC==1)
-					{
-							if(PWM_RX.RSSI<Global_parameter.RSSI_threshold)
-							{
-								LCD_ShowNum_Color(55,20	,GREEN,WHITE,PWM_RX.RSSI,3,16);								
-							}
-							else
-							{
-								LCD_ShowNum_Color(55,20	,RED,WHITE,PWM_RX.RSSI,3,16);					
-							}
-							if(PWM_RX.LQ>Global_parameter.LQ_threshold)
-							{
-								LCD_ShowNum_Color(125,20	,GREEN,WHITE,PWM_RX.LQ,3,16);								
-							}
-							else
-							{
-								LCD_ShowNum_Color(125,20	,RED,WHITE,PWM_RX.LQ,3,16);					
-							}		
+//	float min_threshold=channe_target_fre-1,max_threshold=channe_target_fre+1;		 
+	if((ch_value>4)&(ch_value<11))
+	{
+		
+		return 	ch_value/5*10000;
 
-							
-						 if((((*current_rx_target)>>1)&(0x01))==1) 
-							 {
-
-	//						 LCD_ShowFloat(115,40,PWM_RX.Vbat,RED,WHITE,16,0);
-							if((PWM_RX.Vbat>4.5)&(PWM_RX.Vbat<5.2))
-								{
-								Vbat_color=GREEN;
-								}
-									
-								else 
-								{
-									Vbat_color=RED;
-								}
-								LCD_ShowFloat(115,40,PWM_RX.Vbat,Vbat_color,WHITE,16,0);
-							 }		 
-						 if((((*current_rx_target)>>2)&(0x01))==1) 
-							 {
-								
-								if(CRSF_FRAMETYPE_BARO_ALTITUDE_static>=1)
-								{
-									ALT_color=GREEN;
-								}
-								else
-								{
-									ALT_color=RED;
-								}
-								LCD_ShowFloat(40,40,PWM_RX.ALT,ALT_color,WHITE,16,0);
-	//							LCD_ShowFloat(40,40,PWM_RX.ALT,GREEN,WHITE,16,0);
-
-							 }		
-
-
-							 
-							switch(((*current_rx_target)>>5)&(0xf)) 		 
-						 {
-							case 4:
-							Channle_color=PWM_RX.Channle.CH1/5*10000;
-							LCD_ShowNum_Color(55,60	,Channle_color,WHITE,PWM_RX.Channle.CH1,2,16);
-							Channle_color=PWM_RX.Channle.CH2/5*10000;
-							LCD_ShowNum_Color(135,60	,Channle_color,WHITE,PWM_RX.Channle.CH2,2,16);
-							Channle_color=PWM_RX.Channle.CH3/5*10000;		
-							LCD_ShowNum_Color(55,75	,Channle_color,WHITE,PWM_RX.Channle.CH3,2,16);
-							Channle_color=PWM_RX.Channle.CH4/5*10000;
-							LCD_ShowNum_Color(135,75	,Channle_color,WHITE,PWM_RX.Channle.CH4,2,16);
-							break;
-							case 6:
-							Channle_color=PWM_RX.Channle.CH1/5*10000;
-							LCD_ShowNum_Color(55,60	,Channle_color,WHITE,PWM_RX.Channle.CH1,2,16);
-							Channle_color=PWM_RX.Channle.CH2/5*10000;
-							LCD_ShowNum_Color(135,60	,Channle_color,WHITE,PWM_RX.Channle.CH2,2,16);
-							Channle_color=PWM_RX.Channle.CH3/5*10000;		
-							LCD_ShowNum_Color(55,75	,Channle_color,WHITE,PWM_RX.Channle.CH3,2,16);
-							Channle_color=PWM_RX.Channle.CH4/5*10000;
-							LCD_ShowNum_Color(135,75	,Channle_color,WHITE,PWM_RX.Channle.CH4,2,16);
-							Channle_color=PWM_RX.Channle.CH5/5*10000;		
-							LCD_ShowNum_Color(55,90	,Channle_color,WHITE,PWM_RX.Channle.CH5,2,16);
-							Channle_color=PWM_RX.Channle.CH6/5*10000;
-							LCD_ShowNum_Color(135,90	,Channle_color,WHITE,PWM_RX.Channle.CH6,2,16);							
-							break;
-							case 8:	
-							Channle_color=PWM_RX.Channle.CH1/5*10000;
-							LCD_ShowNum_Color(55,60	,Channle_color,WHITE,PWM_RX.Channle.CH1,2,16);
-							Channle_color=PWM_RX.Channle.CH2/5*10000;
-							LCD_ShowNum_Color(135,60	,Channle_color,WHITE,PWM_RX.Channle.CH2,2,16);
-							Channle_color=PWM_RX.Channle.CH3/5*10000;		
-							LCD_ShowNum_Color(55,75	,Channle_color,WHITE,PWM_RX.Channle.CH3,2,16);
-							Channle_color=PWM_RX.Channle.CH4/5*10000;
-							LCD_ShowNum_Color(135,75	,Channle_color,WHITE,PWM_RX.Channle.CH4,2,16);
-							Channle_color=PWM_RX.Channle.CH5/5*10000;		
-							LCD_ShowNum_Color(55,90	,Channle_color,WHITE,PWM_RX.Channle.CH5,2,16);
-							Channle_color=PWM_RX.Channle.CH6/5*10000;
-							LCD_ShowNum_Color(135,90	,Channle_color,WHITE,PWM_RX.Channle.CH6,2,16);	
-							Channle_color=PWM_RX.Channle.CH7/5*10000;
-							LCD_ShowNum_Color(55,105	,Channle_color,WHITE,PWM_RX.Channle.CH7,2,16);
-							Channle_color=PWM_RX.Channle.CH8/5*10000;
-							LCD_ShowNum_Color(135,105	,Channle_color,WHITE,PWM_RX.Channle.CH8,2,16);							
-							break;
-							case 14:	
-							Channle_color=PWM_RX.Channle.CH1/5*10000;
-							LCD_ShowNum_Color(35,60	,Channle_color,WHITE,PWM_RX.Channle.CH1,2,12);
-							Channle_color=PWM_RX.Channle.CH2/5*10000;
-							LCD_ShowNum_Color(95,60	,Channle_color,WHITE,PWM_RX.Channle.CH2,2,12);
-							Channle_color=PWM_RX.Channle.CH3/5*10000;		
-							LCD_ShowNum_Color(145,60	,Channle_color,WHITE,PWM_RX.Channle.CH3,2,12);
-							
-							Channle_color=PWM_RX.Channle.CH4/5*10000;
-							LCD_ShowNum_Color(35,72	,Channle_color,WHITE,PWM_RX.Channle.CH4,2,12);
-							Channle_color=PWM_RX.Channle.CH5/5*10000;		
-							LCD_ShowNum_Color(95,72	,Channle_color,WHITE,PWM_RX.Channle.CH5,2,12);
-							Channle_color=PWM_RX.Channle.CH6/5*10000;
-							LCD_ShowNum_Color(145,72	,Channle_color,WHITE,PWM_RX.Channle.CH6,2,12);	
-							
-							Channle_color=PWM_RX.Channle.CH7/5*10000;
-							LCD_ShowNum_Color(35,86	,Channle_color,WHITE,PWM_RX.Channle.CH7,2,12);
-							Channle_color=PWM_RX.Channle.CH8/5*10000;
-							LCD_ShowNum_Color(95,86	,Channle_color,WHITE,PWM_RX.Channle.CH8,2,12);
-							Channle_color=PWM_RX.Channle.CH9/5*10000;
-							LCD_ShowNum_Color(145,86	,Channle_color,WHITE,PWM_RX.Channle.CH9,2,12);
-
-							Channle_color=PWM_RX.Channle.CH10/5*10000;
-							LCD_ShowNum_Color(35,98	,Channle_color,WHITE,PWM_RX.Channle.CH10,2,12);
-							Channle_color=PWM_RX.Channle.CH11/5*10000;
-							LCD_ShowNum_Color(95,98	,Channle_color,WHITE,PWM_RX.Channle.CH11,2,12);
-							Channle_color=PWM_RX.Channle.CH12/5*10000;
-							LCD_ShowNum_Color(145,98	,Channle_color,WHITE,PWM_RX.Channle.CH12,2,12);
-						
-							break;
-						 }		
-										
-	//				
-					}
-					else
-					{
-						LCD_ShowNum_Color(55,20	,RED,WHITE,0,3,16);
-						LCD_ShowNum_Color(125,20	,RED,WHITE,0,3,16);
-						
-					 if((((*current_rx_target)>>1)&(0x01))==1) 
-						 {
-
-						 LCD_ShowFloat(115,40,0,RED,WHITE,16,0);
-
-						 }		 
-					 if((((*current_rx_target)>>2)&(0x01))==1) 
-						 {
-
-							LCD_ShowFloat(40,40,0,RED,WHITE,16,0);
-
-						 }						
-						switch(((*current_rx_target)>>5)&(0xf)) 		 
-					 {
-						case 4:
-						LCD_ShowNum_Color(55,60	,RED,WHITE,0,2,16);
-						LCD_ShowNum_Color(135,60	,RED,WHITE,0,2,16);
-						LCD_ShowNum_Color(55,75	,RED,WHITE,0,2,16);
-						LCD_ShowNum_Color(135,75	,RED,WHITE,0,2,16);
-						break;
-						case 6:
-						LCD_ShowNum_Color(55,60	,RED,WHITE,0,2,16);
-						LCD_ShowNum_Color(135,60	,RED,WHITE,0,2,16);
-						LCD_ShowNum_Color(55,75	,RED,WHITE,0,2,16);
-						LCD_ShowNum_Color(135,75	,RED,WHITE,0,2,16);
-						LCD_ShowNum_Color(55,90	,RED,WHITE,0,2,16);
-						LCD_ShowNum_Color(135,90	,RED,WHITE,0,2,16);							
-						break;
-						case 8:	
-						LCD_ShowNum_Color(55,60	,RED,WHITE,0,2,16);
-						LCD_ShowNum_Color(135,60	,RED,WHITE,0,2,16);
-						LCD_ShowNum_Color(55,75	,RED,WHITE,0,2,16);
-						LCD_ShowNum_Color(135,75	,RED,WHITE,0,2,16);
-						LCD_ShowNum_Color(55,90	,RED,WHITE,0,2,16);
-						LCD_ShowNum_Color(135,90	,RED,WHITE,0,2,16);	
-						LCD_ShowNum_Color(55,105	,RED,WHITE,0,2,16);
-						LCD_ShowNum_Color(135,105	,RED,WHITE,0,2,16);							
-						break;
-						case 14:	
-						LCD_ShowNum_Color(35,60	,RED,WHITE,0,2,12);LCD_ShowNum_Color(95,60	,RED,WHITE,0,2,12);LCD_ShowNum_Color(145,60	,RED,WHITE,0,2,12);
-						LCD_ShowNum_Color(35,72	,RED,WHITE,0,2,12);LCD_ShowNum_Color(95,72	,RED,WHITE,0,2,12);LCD_ShowNum_Color(145,72	,RED,WHITE,0,2,12);	
-						LCD_ShowNum_Color(35,86	,RED,WHITE,0,2,12);LCD_ShowNum_Color(95,86	,RED,WHITE,0,2,12);LCD_ShowNum_Color(145,86	,RED,WHITE,0,2,12);
-						LCD_ShowNum_Color(35,98	,RED,WHITE,0,2,12);	LCD_ShowNum_Color(95,98	,RED,WHITE,0,2,12);LCD_ShowNum_Color(145,98	,RED,WHITE,0,2,12);
-						LCD_ShowNum_Color(35,110	,RED,WHITE,0,2,12);LCD_ShowNum_Color(95,110	,RED,WHITE,0,2,12);							
-						break;						
-					 }		
-				}
-				}
-				else if(Get_normal_or_pwm()==0)
-				{
-//					LCD_ShowNum_Color(55,20	,GREEN,WHITE,PWM_RX.RSSI,3,16);
-//					LCD_ShowNum_Color(55,20	,GREEN,WHITE,RX1_telemtering,3,16);	
-//					RX1_telemtering.
-//					RX1_telemtering.
-					
-					
-				}
-
-
+	}
+	else
+	{
+	
+		return 	0xF800;
+	}
 }
 
 
@@ -673,8 +483,7 @@ u8 Auto_test(u8 * current_step)
 	 }
 /////////////////////////////////////
 //Channles
-	 float min_threshold=channe_target_fre-0.2,max_threshold=channe_target_fre+0.2;
-		 
+	 float min_threshold=channe_target_fre-0.3,max_threshold=channe_target_fre+0.3;		 
 	if((*current_step)==3)
 	{
 		if((PWM_RX.Channle.CH1>min_threshold)&(PWM_RX.Channle.CH1<max_threshold)
@@ -713,8 +522,8 @@ u8 Auto_test(u8 * current_step)
 						&(PWM_RX.Channle.CH8>min_threshold)&(PWM_RX.Channle.CH8<max_threshold)
 						&(PWM_RX.Channle.CH9>min_threshold)&(PWM_RX.Channle.CH9<max_threshold)
 						&(PWM_RX.Channle.CH10>min_threshold)&(PWM_RX.Channle.CH10<max_threshold)
-						&(PWM_RX.Channle.CH11>min_threshold)&(PWM_RX.Channle.CH11<max_threshold)
-						&(PWM_RX.Channle.CH12>min_threshold)&(PWM_RX.Channle.CH12<max_threshold)
+//						&(PWM_RX.Channle.CH11>min_threshold)&(PWM_RX.Channle.CH11<max_threshold)
+//						&(PWM_RX.Channle.CH12>min_threshold)&(PWM_RX.Channle.CH12<max_threshold)
 //						&(PWM_RX.Channle.CH14>min_threshold)&(PWM_RX.Channle.CH14<max_threshold)
 						)
 						{Channlepass_cnt++;}		
@@ -812,19 +621,21 @@ u8 Auto_test(u8 * current_step)
 	
 }
 
-void Test_result()
+enum Test_Err Test_result()
 {
 		u16 time_out_cnt=0;
+		u8 result=0;
 		LCD_DrawFillRectangle_color(10, 22, 150, 120,GRAY);
 	
-		LCD_DrawString(40, 25, "Test_result", 16, RED,GRAY);
+		LCD_DrawString(40, 25, "Test_result", 16, BLACK,GRAY);
 		LCD_DrawString(20, 40, "RSSI_LQ---", 16, BLACK,GRAY);
-		LCD_DrawString(20, 55, "Sensor----", 16, BLACK,GRAY);
+
 		LCD_DrawString(20, 70, "Channle---", 16, BLACK,GRAY);
 			
 		if(Test_Err_Global.RSSI_LQ_Err_S==1)
 		{
 			LCD_DrawString(105, 40, "FAIL", 16, RED,GRAY);
+			result++;
 		}
 		else
 		{
@@ -832,9 +643,11 @@ void Test_result()
 		}
 		if((((*current_rx_target)>>1)&0x0f)!=0)
 		{
+				LCD_DrawString(20, 55, "Sensor----", 16, BLACK,GRAY);
 				if(Test_Err_Global.SENSOR_Err_S==1)
 				{
 					LCD_DrawString(105, 55, "FAIL", 16, RED,GRAY);
+					result++;
 				}
 				else
 				{
@@ -844,18 +657,25 @@ void Test_result()
 		if(Test_Err_Global.CHANNLE_Err_S==1)
 		{
 			LCD_DrawString(105, 70, "FAIL", 16, RED,GRAY);
+			result++;
 		}
 		else
 		{
 			LCD_DrawString(105, 70, "PASS", 16, GREEN,GRAY);
 		}
-		if((Test_Err_Global.RSSI_LQ_Err_S==0)&(Test_Err_Global.SENSOR_Err_S==0)&(Test_Err_Global.CHANNLE_Err_S==0))//pass
+		
+		if(result==0)//pass
 		{
+		LCD_DrawString(40, 25, "Test_result", 16, GREEN,GRAY);
 		shortbuzzing();
 		osDelay(100);	
 		shortbuzzing();
 		}
-		else{	shortbuzzing();}//fail
+		else
+		{	
+			LCD_DrawString(40, 25, "Test_result", 16, RED,GRAY);
+			shortbuzzing();
+		}//fail
 		
 		Test_Err_Global.RSSI_LQ_Err_S=0;
 		Test_Err_Global.SENSOR_Err_S=0;
@@ -886,27 +706,30 @@ enum device_Err device_check()
 	}
 }
 
+void Show_test_result()
+{
+	u16 time_out_cnt=0;;
+	while(1)
+	{
+		
+		
+		time_out_cnt++;	
+		osDelay(10);
+		if(time_out_cnt>300)
+		{
+			return;
+		}
+	}
+}
 
 
 
 
 
 
-
-/*****************************************************************************************************
-
-																							DEVICE
-
-******************************************************************************************************/
-
-/*
-创建接收机实例设备
-实例指针
-天线数量
-传感器数量
-通道数量
-RX类型
-*/
+//u8 antenna:	antenna number
+//u8 sensor: 
+//
 void Creat_rx(Rx_target* Rx,u8 antenna,u8 sensor,u8 channles,u8 Rx_type)
 {
 	*Rx=0;
@@ -925,10 +748,6 @@ void Creat_rx(Rx_target* Rx,u8 antenna,u8 sensor,u8 channles,u8 Rx_type)
 //	current_rx_target=Rx;
 }
 
-
-/*
-接收机实例设备初始化
-*/
 void Rx_device_init()
 {
 	u16 * check_rx_last;
@@ -953,10 +772,9 @@ void Rx_device_init()
 	}
 }
 
-/*
-获取接收机的天线数量
 
-*/
+
+
 u8 Get_rx_antenna_numbers()
 {
 	Rx_target* Rx;
@@ -965,10 +783,6 @@ u8 Get_rx_antenna_numbers()
 	return (*Rx>>1)&0x01;
 }
 
-
-/*
-获取接收机的传感器类型
-*/
 u8 Get_rx_sensor()
 {
 	Rx_target* Rx;
@@ -977,10 +791,6 @@ u8 Get_rx_sensor()
 	return (*Rx>>1)&0x0f;
 }
 
-
-/*
-获取PWM接收机的通道数量类型
-*/
 u8 Get_rx_channle_numbers()
 {
 	Rx_target* Rx;
@@ -1011,33 +821,7 @@ extern unsigned char LINK_CONNECT_STATIC;
 extern  uint32_t LINK_CONNECT_Lasttime;
 extern  uint32_t LINK_CONNECT_timeout;
 
-
-/*
-获取接收机的类型
-//return 0 Nomal RX ,return 1 PWM RX 
-*/
-
-uint8_t Get_normal_or_pwm()
-{
-	if((*current_rx_target&0x8000)==Normal_RX)
-	{
-		return 0;
-	
-	}
-	if((*current_rx_target&0x8000)==Pwm_RX)
-	{
-		return 1;
-	
-	}
-
-
-}
-
-
-/*
-//更新接收机信息
-*/
-void Update_PWM_RX_Info()
+void Update_PWM_RX_Info()//获取接收机状态
 {		
 		if(LINK_CONNECT_Lasttime>LINK_CONNECT_timeout)
 		{
@@ -1062,6 +846,10 @@ void Update_PWM_RX_Info()
 			PWM_RX.Channle.CH6=0;
 			PWM_RX.Channle.CH7=0;
 			PWM_RX.Channle.CH8=0;
+			PWM_RX.Channle.CH9=0;
+			PWM_RX.Channle.CH10=0;
+			PWM_RX.Channle.CH11=0;
+			PWM_RX.Channle.CH12=0;
 		}
 		else if (Get_LINK_CONNECT_STATIC()==1)
 		{
@@ -1074,10 +862,6 @@ void Update_PWM_RX_Info()
 }
 
 
-
-/*
-扫描目标FLASH全局参数，若参数存在返回参数索引，若参数不存在返回255
-*/
 u8 scan_para(const char *str)
 {
 	u8 i=0;
@@ -1092,10 +876,6 @@ u8 scan_para(const char *str)
 	
 }	
 
-
-/*
-FLASH全局参数初始化
-*/
 u32 flashed_flag=0;
 u32 flashed_data=1;
 void Flash_para_init()
@@ -1114,12 +894,11 @@ void Flash_para_init()
 	{
 		stmflash_write(0x080E0000,(u32 *)&Global_init_parameter,sizeof(Flash_para));
 	}
+	read_para(&Global_parameter);
 		
 }
 
-/*
-读FLASH全局参数
-*/
+
 u8 read_para(Flash_para * parameter_struct)
 {
 	u8 para_size=0;
@@ -1131,9 +910,7 @@ u8 read_para(Flash_para * parameter_struct)
 	 stmflash_read(0x080E0000,(u32 *)parameter_struct,para_size);
 }
 
-/*
-保存FLASH全局参数
-*/
+
 u8 Save_para(const char *str,void *para_value)
 {
 	u8 t;

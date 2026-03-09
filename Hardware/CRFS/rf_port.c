@@ -7,9 +7,13 @@ uint32_t  RF_Transmitter_wd=0;
 uint8_t  RF_Transmitter_state=0;
 u16 channe_target_value=2000;
 float channe_target_fre=0;
-
+TX  TX_MODEL;
 uint8_t ping_phrase[]={0xEE, 0x04, 0x28, 0x00, 0xEA, 0x54};
 uint8_t ReceiveForTX_buff[64];
+
+uint8_t debug_TX_buff[8]={0xEE,0x06,0x2C, 0xEE, 0xEF, 0x01, 0x00, 0x76};
+
+uint8_t temp_phrase[] ={0xEE, 0x04, 0x28, 0x00, 0xEA, 0x54};
 
 
 uint8_t BIND_phrase[]={0xEE, 0x06, 0x2D, 0xEE, 0xEF, 0x20, 0x00, 0x7E};
@@ -33,6 +37,36 @@ void ping_to_transmitter()//获取高频头信息
 
 //uint8_t * field_indexes[20];
 uint8_t field_indexes[30][20];
+
+extern uint8_t BIND_indexes_num;
+extern u8 index_number;
+uint8_t  PING_TX_INFO()//debug
+{
+	uint8_t crc=0;
+	static uint8_t i=0;
+//	int length = sizeof(temp_phrase) / sizeof(temp_phrase[0]);
+//	length=length-2;
+	if(index_number==0)
+	{
+//		memcpy(temp_phrase,ping_phrase,sizeof(ping_phrase) / sizeof(ping_phrase[0]));
+		HAL_UART_Transmit(&rf_huart_port,ping_phrase,6,20);	
+	}
+	else if(BIND_indexes_num==0)
+	{
+			for(i=0;i<index_number;i++)//根据索引数量遍历
+		{
+			debug_TX_buff[5]=i;
+			crc= CalcCRC(&debug_TX_buff[2], debug_TX_buff[1]-1);
+			debug_TX_buff[7]=crc;
+			HAL_UART_Transmit(&rf_huart_port,debug_TX_buff,8,50);
+			osDelay(20);
+
+		}
+	
+	}	
+}
+
+
 uint8_t traverse_indexes_form_TX()//遍历高频头索引信息
 {
 	uint8_t crc=0;
@@ -47,7 +81,7 @@ uint8_t traverse_indexes_form_TX()//遍历高频头索引信息
 //		traverse_indexes_phrase[5]=i;
 //		crc= CalcCRC(&traverse_indexes_phrase[2], traverse_indexes_phrase[1]-1);
 //		traverse_indexes_phrase[7]=crc;
-//		HAL_UART_Transmit(&rf_huart_port,ReceiveForTX_buff,64,50);
+//		HAL_UAR T_Transmit(&rf_huart_port,ReceiveForTX_buff,64,50);
 //	}
 	
 }
@@ -58,8 +92,8 @@ void transmitter_BIND()//高频头绑定操作
 {
 //	
 	  static uint8_t BindData[]= {0xEC,0x04,0x32,'b','d',0x23};	
-//	BIND_phrase[5]=BIND_indexes_num;
-//	BIND_phrase[7]=CalcCRC(&BIND_phrase[2], BIND_phrase[1]-1);
+	BIND_phrase[5]=BIND_indexes_num;
+	BIND_phrase[7]=CalcCRC(&BIND_phrase[2], BIND_phrase[1]-1);
 		HAL_UART_Transmit(&rf_huart_port,BIND_phrase,8,20);
 		HAL_UART_Transmit(&huart1,BindData,6,10);
 		HAL_UART_Transmit(&huart2,BindData,6,10);
@@ -74,6 +108,9 @@ void transmitter_BIND()//高频头绑定操作
 		HAL_UART_Transmit(&rf_huart_port,BIND_phrase,8,20);
 		HAL_UART_Transmit(&rf_huart_port,BIND_phrase,8,20);
 		HAL_UART_Transmit(&rf_huart_port,BIND_phrase,8,20);
+		HAL_UART_Transmit(&rf_huart_port,BIND_phrase,8,20);
+		HAL_UART_Transmit(&rf_huart_port,BIND_phrase,8,20);
+
 }
 
 

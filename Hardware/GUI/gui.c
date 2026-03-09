@@ -20,12 +20,6 @@ extern parameter_t * Parameter_List[2];
 extern Flash_para Global_parameter;
 
 
-/*****************************************************************************************************
-
-																							method
-
-******************************************************************************************************/
-
 /*******************************************************************
  * @name       :void GUI_DrawPoint(uint16_t x,uint16_t y,uint16_t color)
  * @date       :2018-08-09 
@@ -989,13 +983,30 @@ void LcdDisplay(uint8_t Row,uint8_t *str)
 }
 
 
+/*********************************************************************
+-
 
-/*****************************************************************************************************
+-
+**********************************************************************/
+const unsigned char BMP1[]=
+{0x00,0x01,0x00,0x03,0x00,0x03,0x00,0x06,0x00,0x0C,
+	0x00,0x08,0x00,0x18,0x40,0x30,0x60,0x60,0x30,0xC0,
+0x19,0x80,0x0B,0x00,0x0F,0x00,0x06,0x00,0x04,0x00,0x00,0x00};/*"未命名文件",0*/
 
-																							menu
+void draw_tick(uint16_t x,uint16_t y)
+{
+	
+	Gui_Drawbmp16(0,100,BMP1);
 
-******************************************************************************************************/
+}
 
+/*//-------------------------------------------------------------------------------------------
+
+menu
+
+
+
+//-------------------------------------------------------------------------------------------*/
 
 void LCD_DrawString(uint16_t x,uint16_t y,const char*p,uint8_t size,uint16_t color,uint16_t bc)
 {
@@ -1056,7 +1067,8 @@ Menu_list receiver_Menu={receiverItems,RECEIVER_MENU_COUNT};
 static const char* systemItems[] = {
     "*LQ_t",
     "*RSSI_t",
-		"Version     v1.0.1",
+		"Version     v1.0.2",
+		
 };
 #define SYSTEM_MENU_COUNT 3
 
@@ -1167,7 +1179,7 @@ void drawScrollMenu(u16 x,u16 y, u8 size)
  void drawManualTestMenu(void) {
     LCD_Clear(0xffff);
     LCD_DrawString(30, 0, "Manual Test", 16, RED,WHITE);
-		if(Get_normal_or_pwm()==1)
+		if((*current_rx_target&0x8000)==Pwm_RX)
 		{
 				LCD_DrawString(5, 20, "RSSI:", 16, BLACK,WHITE);
 				LCD_DrawString(90, 20, "LQ:", 16, BLACK,WHITE);
@@ -1210,15 +1222,24 @@ void drawScrollMenu(u16 x,u16 y, u8 size)
 					LCD_DrawString(90, 105, "ch8:", 16, BLACK,WHITE);					
 					break;
 					case 14:	
-					LCD_DrawString(5, 60, "ch1:", 12, BLACK,WHITE);	LCD_DrawString(65, 60, "ch2:", 12, BLACK,WHITE);LCD_DrawString(115, 60, "ch3:", 12, BLACK,WHITE);
-					LCD_DrawString(5, 72, "ch4:", 12, BLACK,WHITE);	LCD_DrawString(65, 72, "ch5:", 12, BLACK,WHITE);LCD_DrawString(115, 72, "ch6:", 12, BLACK,WHITE);
-					LCD_DrawString(5, 84, "ch7:", 12, BLACK,WHITE);	LCD_DrawString(65, 84, "ch8:", 12, BLACK,WHITE);LCD_DrawString(115, 84, "ch9:", 12, BLACK,WHITE);
-					LCD_DrawString(5, 96, "ch10:", 12, BLACK,WHITE);LCD_DrawString(65, 96, "ch11:", 12, BLACK,WHITE);LCD_DrawString(115, 96, "ch12:", 12, BLACK,WHITE);
-					LCD_DrawString(5, 108, "ch13:", 12, BLACK,WHITE);LCD_DrawString(65, 108, "ch14:", 12, BLACK,WHITE);
+					LCD_DrawString(5, 45, "ch1:", 16, BLACK,WHITE);
+					LCD_DrawString(90, 45, "ch2:", 16, BLACK,WHITE);			
+					LCD_DrawString(5, 60, "ch3:", 16, BLACK,WHITE);
+					LCD_DrawString(90, 60, "ch4:", 16, BLACK,WHITE);				
+					LCD_DrawString(5, 75, "ch5:", 16, BLACK,WHITE);
+					LCD_DrawString(90, 75, "ch6:", 16, BLACK,WHITE);
+					LCD_DrawString(5, 90, "ch7:", 16, BLACK,WHITE);
+					LCD_DrawString(90, 90, "ch8:", 16, BLACK,WHITE);	
+					LCD_DrawString(5, 105, "ch9:", 16, BLACK,WHITE);
+					LCD_DrawString(90, 105, "ch10:", 16, BLACK,WHITE);
+//					LCD_DrawString(5, 60, "ch1:", 12, BLACK,WHITE);	LCD_DrawString(65, 60, "ch2:", 12, BLACK,WHITE);LCD_DrawString(115, 60, "ch3:", 12, BLACK,WHITE);
+//					LCD_DrawString(5, 72, "ch4:", 12, BLACK,WHITE);	LCD_DrawString(65, 72, "ch5:", 12, BLACK,WHITE);LCD_DrawString(115, 72, "ch6:", 12, BLACK,WHITE);
+//					LCD_DrawString(5, 84, "ch7:", 12, BLACK,WHITE);	LCD_DrawString(65, 84, "ch8:", 12, BLACK,WHITE);LCD_DrawString(115, 84, "ch9:", 12, BLACK,WHITE);
+//					LCD_DrawString(5, 96, "ch10:", 12, BLACK,WHITE);LCD_DrawString(65, 96, "ch11:", 12, BLACK,WHITE);LCD_DrawString(115, 96, "ch12:", 12, BLACK,WHITE);
 					break;				 
 				 }				
 			}
-		else if(Get_normal_or_pwm()==0)
+		else if((*current_rx_target&0x8000)==Normal_RX)
 		{
 				LCD_DrawString(5, 20, "1RSSI:", 16, BLACK,WHITE);    LCD_DrawString(90, 20, "1LQ:", 16, BLACK,WHITE);		
 				LCD_DrawString(5, 36, "1RQLY:", 16, BLACK,WHITE);    LCD_DrawString(90, 36, "1TQLY:", 16, BLACK,WHITE);		
@@ -1410,7 +1431,14 @@ extern TaskHandle_t RX_TESTTask_Handle;
             
         case KEY_ENTER:
         case KEY_RIGHT:
+        case KEY_1:    
 
+//						Stop_Auto_Test();
+						LCD_Clear(0xffff);
+						HAL_Delay(50);
+										drawManualTestMenu();
+										Start_Manual_Test();
+            break;
             break;
             
         default:

@@ -39,9 +39,69 @@ uint32_t Tim4DowmStartCapture[4]={0};   //捕获值
 Pwm_channle_t Pwm_channle;
 
 TIM_HandleTypeDef *htimtemp;
+
+
 void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
 {
 	htimtemp=htim;
+	if (htim->Instance==htim12.Instance)
+	{
+		if(htim->Channel==HAL_TIM_ACTIVE_CHANNEL_1)
+        {
+            switch(Tim1CaptureStatus[0])
+            {
+                case 0:
+                    Tim1UpStartCapture[0] = Time8usCNT;
+                    __HAL_TIM_SET_CAPTUREPOLARITY(&htim12,TIM_CHANNEL_1,TIM_ICPOLARITY_FALLING);  //设置下降沿捕获
+                    Tim1CaptureStatus[0]++;
+                break;
+                case 1:
+                    Tim1DowmStartCapture[0] = Time8usCNT;
+                    Tim1UpTime[0] = Tim1DowmStartCapture[0] - Tim1UpStartCapture[0];
+                    __HAL_TIM_SET_CAPTUREPOLARITY(&htim12,TIM_CHANNEL_1,TIM_ICPOLARITY_RISING);  //设置上升沿捕获
+                    Tim1CaptureStatus[0]++;
+                break;
+                case 2:
+                    Tim1DowmTime[0] = Time8usCNT - Tim1DowmStartCapture[0];
+                    HAL_TIM_IC_Stop_IT(&htim12,TIM_CHANNEL_1);  //停止输入捕获
+                    TimeFrequency[2]=1000000.0/(Tim1UpTime[0]+Tim1DowmTime[0])/Tim1Period;
+                    TimeDuty[2]=100.0*Tim1UpTime[0]/((Tim1UpTime[0]+Tim1DowmTime[0]));
+                
+                    Tim1CaptureStatus[0]=0;  //清空标志位
+                    __HAL_TIM_SET_CAPTUREPOLARITY(&htim12,TIM_CHANNEL_1,TIM_INPUTCHANNELPOLARITY_RISING);
+                    HAL_TIM_IC_Start_IT(&htim12,TIM_CHANNEL_1);
+                break;
+            }
+        }
+        if(htim->Channel==HAL_TIM_ACTIVE_CHANNEL_2)
+        {
+            switch(Tim1CaptureStatus[1])
+            {
+                case 0:
+                    Tim1UpStartCapture[1] = Time8usCNT;
+                    __HAL_TIM_SET_CAPTUREPOLARITY(&htim12,TIM_CHANNEL_2,TIM_ICPOLARITY_FALLING);  //设置下降沿捕获
+                    Tim1CaptureStatus[1]++;
+                break;
+                case 1:
+                    Tim1DowmStartCapture[1] = Time8usCNT;
+                    Tim1UpTime[1] = Tim1DowmStartCapture[1] - Tim1UpStartCapture[1];
+                    __HAL_TIM_SET_CAPTUREPOLARITY(&htim12,TIM_CHANNEL_2,TIM_ICPOLARITY_RISING);  //设置上升沿捕获
+                    Tim1CaptureStatus[1]++;
+                break;
+                case 2:
+                    Tim1DowmTime[1] = Time8usCNT - Tim1DowmStartCapture[1];
+                    HAL_TIM_IC_Stop_IT(&htim12,TIM_CHANNEL_2);  //停止输入捕获
+                    TimeFrequency[3]=1000000.0/(Tim1UpTime[1]+Tim1DowmTime[1])/Tim1Period;
+                    TimeDuty[3]=100.0*Tim1UpTime[1]/((Tim1UpTime[1]+Tim1DowmTime[1]));
+                
+                    Tim1CaptureStatus[1]=0;  //清空标志位
+                    __HAL_TIM_SET_CAPTUREPOLARITY(&htim12,TIM_CHANNEL_2,TIM_INPUTCHANNELPOLARITY_RISING);
+                    HAL_TIM_IC_Start_IT(&htim12,TIM_CHANNEL_2);
+                break;
+            }
+        }
+
+    }
 	if (htim->Instance==htim2.Instance)
 	{
 		if(htim->Channel==HAL_TIM_ACTIVE_CHANNEL_1)
@@ -387,4 +447,16 @@ void Get_Pwm_channle()//获取PWM 结构体Pwm_channle
 	Pwm_channle.CH6=TimeDuty[5];
 	Pwm_channle.CH7=TimeDuty[6];
 	Pwm_channle.CH8=TimeDuty[7];
+	Pwm_channle.CH9=TimeDuty[0];
+	Pwm_channle.CH10=TimeDuty[1];
+	Pwm_channle.CH11=TimeDuty[2];
+	Pwm_channle.CH12=TimeDuty[3];
+}
+
+void Clean_Pwm_channle()//
+{
+	memset(TimeDuty, 0, sizeof(TimeDuty));
+//	memset(TimeDuty, 0, sizeof(TimeDuty));
+
+	
 }

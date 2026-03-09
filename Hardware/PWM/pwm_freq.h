@@ -20,7 +20,7 @@ typedef struct Pwm_channle_Duty
 
 
 void Get_Pwm_channle();
-
+void Clean_Pwm_channle();
 
 
 #endif

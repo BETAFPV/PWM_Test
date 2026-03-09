@@ -2,6 +2,7 @@
 #include "rf_port.h"
 #include "main.h"
 #include "flash.h"
+#include "pwm_freq.h"
 
 
 
@@ -65,6 +66,7 @@ void Key_Scan(void )
 			if(HAL_GPIO_ReadPin(KEY_2_PORT,KEY_2_PIN)==RESET)//按下立刻操作
 			{
 				transmitter_BIND();
+//				degub_TX();
 			Key_5D_state=7;
 			}
 			while(HAL_GPIO_ReadPin(KEY_2_PORT,KEY_2_PIN)==RESET)
@@ -241,8 +243,7 @@ Key_TypeDef Key_5D_Scan(Key_TypeDef *dev, Key_Event_TypeDef *event)
 			
 			if(HAL_GPIO_ReadPin(KEY_1_PORT,KEY_1_PIN)==RESET)//按下立刻操作
 			{
-				
-//				transmitter_BIND();
+				Clean_Pwm_channle();
 //			Key_5D_state=6;
 				*event=KEY_EVENT_PRESS;
 			}

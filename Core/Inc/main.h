@@ -83,12 +83,6 @@ void Error_Handler(void);
 #define KEY_1_GPIO_Port GPIOB
 #define BUZZ_Pin GPIO_PIN_10
 #define BUZZ_GPIO_Port GPIOC
-#define LED_RX3_Pin GPIO_PIN_11
-#define LED_RX3_GPIO_Port GPIOC
-#define LED_RX2_Pin GPIO_PIN_12
-#define LED_RX2_GPIO_Port GPIOC
-#define LED_RX1_Pin GPIO_PIN_2
-#define LED_RX1_GPIO_Port GPIOD
 
 /* USER CODE BEGIN Private defines */
 #include <stdint.h>  // 包含 int32_t、uint32_t 等类型的定义

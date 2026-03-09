@@ -60,11 +60,11 @@ void stmflash_write(uint32_t waddr, uint32_t *pbuf, uint32_t length)
     uint32_t addrx = 0;
     uint32_t endaddr = 0;
     uint32_t sectorerror=0;
-    
+    __disable_irq(); 
     if (waddr < STM32_FLASH_BASE || waddr % 4 ||        /* 写入地址小于 STM32_FLASH_BASE, 或不是4的整数倍, 非法. */
         waddr > (STM32_FLASH_BASE + STM32_FLASH_SIZE))  /* 写入地址大于 STM32_FLASH_BASE + STM32_FLASH_SIZE, 非法. */
     {
-        return;
+			return;
     }
 
     HAL_FLASH_Unlock();             /* 解锁 */
@@ -80,14 +80,20 @@ void stmflash_write(uint32_t waddr, uint32_t *pbuf, uint32_t length)
         {
             if (stmflash_read_word(addrx) != 0XFFFFFFFF)    /* 有非0XFFFFFFFF的地方,要擦除这个扇区 */
             {
+							uint8_t Erase_cnt;
                 flasheraseinit.TypeErase=FLASH_TYPEERASE_SECTORS;       /* 擦除类型，扇区擦除 */
                 flasheraseinit.Sector=stmflash_get_flash_sector(addrx); /* 要擦除的扇区 */
                 flasheraseinit.NbSectors=1;                             /* 一次只擦除一个扇区 */
                 flasheraseinit.VoltageRange=FLASH_VOLTAGE_RANGE_3;      /* 电压范围，VCC=2.7~3.6V之间!! */
 
-                if(HAL_FLASHEx_Erase(&flasheraseinit, &sectorerror) != HAL_OK) 
+                while(HAL_FLASHEx_Erase(&flasheraseinit, &sectorerror) != HAL_OK) //!!!!!!
                 {
-                    break;/* 发生错误了 */
+										Erase_cnt++;
+										if(Erase_cnt>10)
+										{
+										   break;/* 发生错误了 */
+										}
+
                 }
 
             }
@@ -118,6 +124,7 @@ void stmflash_write(uint32_t waddr, uint32_t *pbuf, uint32_t length)
     FLASH->ACR |= 1 << 10;          /* FLASH擦除结束,开启数据fetch */
 
     HAL_FLASH_Lock();               /* 上锁 */
+		__enable_irq(); 
 }
 
 /**
