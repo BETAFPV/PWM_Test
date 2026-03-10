@@ -6,6 +6,10 @@
 #define CRSF_RX2_GET 2
 #define CRSF_RX3_GET 3
 #define CRSF_RX4_GET 4
+#define CRSF_RX5_GET 5
+#define CRSF_RX6_GET 6
+
+
 #define CRSF_data_num       60
 
 #define CRSF_NUM_CHANNELS       16
@@ -145,6 +149,9 @@ void RX_1_DataDeal();
 void RX_2_DataDeal();
 void RX_3_DataDeal();
 void RX_4_DataDeal();
+void RX_5_DataDeal();
+void RX_5_DataDeal();
+
 uint8_t Feed_RX_wdg(uint8_t Rx_Num);
 uint8_t RX_wdg();
 void CRSFReceived(void);

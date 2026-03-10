@@ -124,10 +124,10 @@ int main(void)
   MX_TIM6_Init();
   MX_TIM7_Init();
   MX_UART4_Init();
-//  MX_IWDG_Init();
   MX_TIM12_Init();
   MX_UART5_Init();
   MX_USART6_UART_Init();
+  MX_IWDG_Init();
   /* USER CODE BEGIN 2 */
 	Flash_para_init();
 	Crc8_init(0xD5);
