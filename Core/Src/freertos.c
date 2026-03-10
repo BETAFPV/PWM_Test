@@ -43,7 +43,18 @@ extern Rx_target Rx4,Rx6,Rx6_dual,Rx8_dual;//PWM接收机
 extern Rx_target SuperD,SuperXnano,SuperXmono;//rx接收机
 			extern float channe_target_fre;
 extern	u8 CRSF_FRAMETYPE_BARO_ALTITUDE_static;
+extern crsfLinkStatistics_t RX1_telemtering;
+extern crsfLinkStatistics_t RX2_telemtering;
+extern crsfLinkStatistics_t RX3_telemtering;
+extern crsfLinkStatistics_t RX4_telemtering;
+extern crsfLinkStatistics_t RX5_telemtering;
+extern crsfLinkStatistics_t RX6_telemtering;
 
+extern int8_t RX1_RSSI,RX1_LQ_GET,//接收机回传信息
+			 RX2_RSSI,RX2_LQ_GET,
+			 RX3_RSSI,RX3_LQ_GET,
+			 RX5_RSSI,RX5_LQ_GET,
+		   RX6_RSSI,RX6_LQ_GET;			
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -490,7 +501,20 @@ void RX_TEST_MANUL_Task_Fun(void const * argument)
 				}
 				else if((*current_rx_target&0x8000)==Normal_RX)
 				{
-//					LCD_ShowNum_Color(55,20	,GREEN,WHITE,PWM_RX.RSSI,3,16);
+										LCD_ShowNum_Color(55,20	,GREEN,WHITE,RX1_RSSI,3,16);
+					LCD_ShowNum_Color(135,20	,GREEN,WHITE,RX1_LQ_GET,3,16);
+					
+										LCD_ShowNum_Color(55,36	,GREEN,WHITE,RX2_RSSI,3,16);
+					LCD_ShowNum_Color(135,36	,GREEN,WHITE,RX2_LQ_GET,3,16);
+					
+										LCD_ShowNum_Color(55,56	,GREEN,WHITE,RX3_RSSI,3,16);
+					LCD_ShowNum_Color(135,56	,GREEN,WHITE,RX3_LQ_GET,3,16);
+					
+										LCD_ShowNum_Color(55,72	,GREEN,WHITE,RX5_RSSI,3,16);
+					LCD_ShowNum_Color(135,72	,GREEN,WHITE,RX5_LQ_GET,3,16);
+					
+										LCD_ShowNum_Color(55,92	,GREEN,WHITE,RX6_RSSI,3,16);
+					LCD_ShowNum_Color(135,92	,GREEN,WHITE,RX6_LQ_GET,3,16);
 //					LCD_ShowNum_Color(55,20	,GREEN,WHITE,RX1_telemtering,3,16);	
 //					RX1_telemtering.
 //					RX1_telemtering.

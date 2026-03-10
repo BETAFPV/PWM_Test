@@ -98,12 +98,19 @@ void transmitter_BIND()//高频头绑定操作
 		HAL_UART_Transmit(&huart1,BindData,6,10);
 		HAL_UART_Transmit(&huart2,BindData,6,10);
 		HAL_UART_Transmit(&huart3,BindData,6,10);
+		HAL_UART_Transmit(&huart5,BindData,6,10);
+		HAL_UART_Transmit(&huart6,BindData,6,10);
+		
 		HAL_UART_Transmit(&huart1,BindData,6,10);
 		HAL_UART_Transmit(&huart2,BindData,6,10);
-		HAL_UART_Transmit(&huart3,BindData,6,10);				
+		HAL_UART_Transmit(&huart3,BindData,6,10);	
+		HAL_UART_Transmit(&huart5,BindData,6,10);
+		HAL_UART_Transmit(&huart6,BindData,6,10);		
 		HAL_UART_Transmit(&huart1,BindData,6,10);
 		HAL_UART_Transmit(&huart2,BindData,6,10);
 		HAL_UART_Transmit(&huart3,BindData,6,10);
+		HAL_UART_Transmit(&huart5,BindData,6,10);
+		HAL_UART_Transmit(&huart6,BindData,6,10);		
 		osDelay(10);
 		HAL_UART_Transmit(&rf_huart_port,BIND_phrase,8,20);
 		HAL_UART_Transmit(&rf_huart_port,BIND_phrase,8,20);

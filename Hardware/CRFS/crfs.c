@@ -22,10 +22,11 @@ crsfLinkStatistics_t RX6_telemtering;
 
 RX_online_flag RX1_online_flag,RX2_online_flag,RX3_online_flag,RX5_online_flag,RX6_online_flag;
 
-int8_t RX1_RSSI_ant1,RX1_RSSI_ant2,RX1_LQ_GET,//接收机回传信息
-				RX2_RSSI_ant1,RX2_RSSI_ant2,RX2_LQ_GET,
-					RX3_RSSI_ant1,RX3_RSSI_ant2,RX3_LQ_GET;
-					
+int8_t RX1_RSSI,RX1_LQ_GET,//接收机回传信息
+			 RX2_RSSI,RX2_LQ_GET,
+			 RX3_RSSI,RX3_LQ_GET,
+			 RX5_RSSI,RX5_LQ_GET,
+		   RX6_RSSI,RX6_LQ_GET;					
 					
 int8_t TX_RSSI_GET,TX_LQ_GET;//高频头回传信息
 unsigned char LINK_CONNECT_STATIC=0;
@@ -326,10 +327,11 @@ void ProcessPacketIn(uint8_t len)
 														break;
 												case CRSF_FRAMETYPE_LINK_STATISTICS:
 														PacketLinkStatistics(hdr1);
+														RX1_RSSI=GetCrsfRssiDbm();
+														RX1_LQ_GET=GetCrsfLinkQuality(); 												
 														GetRxTelemetering_info(&RX1_telemtering,&_linkStatistics);
 														Feed_RX_wdg(1);
-												
-														RX1_LQ_GET=GetCrsfLinkQuality(); 
+
 														break;
 												case CRSF_FRAMETYPE_MSP_WRITE:
 														break;
@@ -352,9 +354,10 @@ void ProcessPacketIn(uint8_t len)
 									break;
 									case CRSF_FRAMETYPE_LINK_STATISTICS:
 											PacketLinkStatistics(hdr2);
+											RX2_RSSI=GetCrsfRssiDbm();
+											RX2_LQ_GET=GetCrsfLinkQuality(); 			
 											GetRxTelemetering_info(&RX2_telemtering,&_linkStatistics);
 											Feed_RX_wdg(2);
-											RX2_LQ_GET=GetCrsfLinkQuality(); 
 									break;
 									case CRSF_FRAMETYPE_MSP_WRITE:
 									break;
@@ -377,9 +380,11 @@ void ProcessPacketIn(uint8_t len)
 									break;
 									case CRSF_FRAMETYPE_LINK_STATISTICS:
 											PacketLinkStatistics(hdr3);
+											RX3_RSSI=GetCrsfRssiDbm();
+											RX3_LQ_GET=GetCrsfLinkQuality(); 			
 											GetRxTelemetering_info(&RX3_telemtering,&_linkStatistics);
 											Feed_RX_wdg(3);
-											RX3_LQ_GET=GetCrsfLinkQuality(); 
+
 									break;
 									case CRSF_FRAMETYPE_MSP_WRITE:
 									break;
@@ -452,9 +457,11 @@ void ProcessPacketIn(uint8_t len)
 									break;
 									case CRSF_FRAMETYPE_LINK_STATISTICS:
 											PacketLinkStatistics(hdr5);
+											RX5_RSSI=GetCrsfRssiDbm();
+											RX5_LQ_GET=GetCrsfLinkQuality(); 	
 											GetRxTelemetering_info(&RX5_telemtering,&_linkStatistics);
 											Feed_RX_wdg(5);
-//											RX3_LQ_GET=GetCrsfLinkQuality(); 
+//											RX4_LQ_GET=GetCrsfLinkQuality(); 
 									break;
 									case CRSF_FRAMETYPE_MSP_WRITE:
 									break;
@@ -477,9 +484,11 @@ void ProcessPacketIn(uint8_t len)
 									break;
 									case CRSF_FRAMETYPE_LINK_STATISTICS:
 											PacketLinkStatistics(hdr6);
+											RX6_RSSI=GetCrsfRssiDbm();
+											RX6_LQ_GET=GetCrsfLinkQuality(); 	
 											GetRxTelemetering_info(&RX6_telemtering,&_linkStatistics);
 											Feed_RX_wdg(6);
-//											RX3_LQ_GET=GetCrsfLinkQuality(); 
+//											RX5_LQ_GET=GetCrsfLinkQuality(); 
 									break;
 									case CRSF_FRAMETYPE_MSP_WRITE:
 									break;
@@ -681,26 +690,36 @@ uint8_t RX_wdg()
 	if(RX1_online_flag>1000)//1s没更新则清空回传信息
 	{
 		memset(&RX1_telemtering, 0, sizeof(crsfLinkStatistics_t));
+		RX1_RSSI=0;
+		RX1_LQ_GET=0;
 		RX1_online_flag=1000;
 	}
 	if(RX2_online_flag>1000)
 	{
 		memset(&RX2_telemtering, 0, sizeof(crsfLinkStatistics_t));
+		RX2_RSSI=0;
+		RX2_LQ_GET=0;
 		RX2_online_flag=1000;
 	}
 	if(RX3_online_flag>1000)
 	{
 		memset(&RX3_telemtering, 0, sizeof(crsfLinkStatistics_t));
+		RX3_RSSI=0;
+		RX3_LQ_GET=0;
 		RX3_online_flag=1000;
 	}
 		if(RX5_online_flag>1000)
 	{
 		memset(&RX5_telemtering, 0, sizeof(crsfLinkStatistics_t));
+		RX5_RSSI=0;
+		RX5_LQ_GET=0;
 		RX5_online_flag=1000;
 	}
 		if(RX6_online_flag>1000)
 	{
 		memset(&RX6_telemtering, 0, sizeof(crsfLinkStatistics_t));
+		RX6_RSSI=0;
+		RX6_LQ_GET=0;
 		RX6_online_flag=1000;
 	}
 }

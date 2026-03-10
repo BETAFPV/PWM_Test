@@ -1242,13 +1242,12 @@ void drawScrollMenu(u16 x,u16 y, u8 size)
 		else if((*current_rx_target&0x8000)==Normal_RX)
 		{
 				LCD_DrawString(5, 20, "1RSSI:", 16, BLACK,WHITE);    LCD_DrawString(90, 20, "1LQ:", 16, BLACK,WHITE);		
-				LCD_DrawString(5, 36, "1RQLY:", 16, BLACK,WHITE);    LCD_DrawString(90, 36, "1TQLY:", 16, BLACK,WHITE);		
+				LCD_DrawString(5, 36, "2RSSI:", 16, BLACK,WHITE);    LCD_DrawString(90, 36, "1LQ:", 16, BLACK,WHITE);		
 
-				LCD_DrawString(5, 56, "2RSSI:", 16, BLACK,WHITE);    LCD_DrawString(90, 56, "2LQ:", 16, BLACK,WHITE);		
-				LCD_DrawString(5, 72, "2RQLY:", 16, BLACK,WHITE);    LCD_DrawString(90, 72, "2TQLY:", 16, BLACK,WHITE);							
+				LCD_DrawString(5, 56, "3RSSI:", 16, BLACK,WHITE);    LCD_DrawString(90, 56, "3LQ:", 16, BLACK,WHITE);		
+				LCD_DrawString(5, 72, "4RSSI:", 16, BLACK,WHITE);    LCD_DrawString(90, 72, "4LQ:", 16, BLACK,WHITE);							
 
-				LCD_DrawString(5, 92, "3RSSI:", 16, BLACK,WHITE);    LCD_DrawString(90, 92, "3LQ:", 16, BLACK,WHITE);		
-				LCD_DrawString(5, 108, "3RQLY:", 16, BLACK,WHITE);    LCD_DrawString(90, 108, "3TQLY:", 16, BLACK,WHITE);										
+				LCD_DrawString(5, 92, "5RSSI:", 16, BLACK,WHITE);    LCD_DrawString(90, 92, "5LQ:", 16, BLACK,WHITE);		
 		}
 	 
 	 
