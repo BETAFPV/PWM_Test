@@ -17,8 +17,10 @@ crsfLinkStatistics_t RX1_telemtering;
 crsfLinkStatistics_t RX2_telemtering;
 crsfLinkStatistics_t RX3_telemtering;
 crsfLinkStatistics_t RX4_telemtering;
+crsfLinkStatistics_t RX5_telemtering;
+crsfLinkStatistics_t RX6_telemtering;
 
-RX_online_flag RX1_online_flag,RX2_online_flag,RX3_online_flag;
+RX_online_flag RX1_online_flag,RX2_online_flag,RX3_online_flag,RX5_online_flag,RX6_online_flag;
 
 int8_t RX1_RSSI_ant1,RX1_RSSI_ant2,RX1_LQ_GET,//接收机回传信息
 				RX2_RSSI_ant1,RX2_RSSI_ant2,RX2_LQ_GET,
@@ -36,6 +38,8 @@ uint8_t CRSF_RawData_1[CRSF_MAX_PACKET_LEN];
 uint8_t CRSF_RawData_2[CRSF_MAX_PACKET_LEN];
 uint8_t CRSF_RawData_3[CRSF_MAX_PACKET_LEN];
 uint8_t CRSF_RawData_4[CRSF_MAX_PACKET_LEN];
+uint8_t CRSF_RawData_5[CRSF_MAX_PACKET_LEN];
+uint8_t CRSF_RawData_6[CRSF_MAX_PACKET_LEN];
 
 
 long map(long x, long in_min, long in_max, long out_min, long out_max)
@@ -303,6 +307,8 @@ const crsf_header_t * hdr1 ;
 const crsf_header_t * hdr2 ;
 const crsf_header_t * hdr3 ;
 const crsf_header_t * hdr4 ;
+const crsf_header_t * hdr5 ;
+const crsf_header_t * hdr6 ;
 void ProcessPacketIn(uint8_t len)
 {
 
@@ -433,7 +439,56 @@ void ProcessPacketIn(uint8_t len)
 						} // CRSF_ADDRESS_RADIO_TRANSMITTER
 					}	
 			break;
-	
+			case CRSF_RX5_GET: //接收机4
+				{
+					hdr5 = (crsf_header_t *)CRSF_RawData_5;
+				// CRSF_ADDRESS_FLIGHT_CONTROLLER
+					if (hdr5->device_addr == CRSF_ADDRESS_FLIGHT_CONTROLLER)
+				{
+							switch (hdr5->type)
+							{
+									case CRSF_FRAMETYPE_RC_CHANNELS_PACKED:
+											PacketChannelsPacked(hdr5);
+									break;
+									case CRSF_FRAMETYPE_LINK_STATISTICS:
+											PacketLinkStatistics(hdr5);
+											GetRxTelemetering_info(&RX5_telemtering,&_linkStatistics);
+											Feed_RX_wdg(5);
+//											RX3_LQ_GET=GetCrsfLinkQuality(); 
+									break;
+									case CRSF_FRAMETYPE_MSP_WRITE:
+									break;
+									case CRSF_FRAMETYPE_DEVICE_INFO:\
+									break;
+							}
+					}		
+				}
+			break;
+			case CRSF_RX6_GET: //接收机5
+				{
+					hdr6 = (crsf_header_t *)CRSF_RawData_6;
+				// CRSF_ADDRESS_FLIGHT_CONTROLLER
+					if (hdr6->device_addr == CRSF_ADDRESS_FLIGHT_CONTROLLER)
+				{
+							switch (hdr6->type)
+							{
+									case CRSF_FRAMETYPE_RC_CHANNELS_PACKED:
+											PacketChannelsPacked(hdr6);
+									break;
+									case CRSF_FRAMETYPE_LINK_STATISTICS:
+											PacketLinkStatistics(hdr6);
+											GetRxTelemetering_info(&RX6_telemtering,&_linkStatistics);
+											Feed_RX_wdg(6);
+//											RX3_LQ_GET=GetCrsfLinkQuality(); 
+									break;
+									case CRSF_FRAMETYPE_MSP_WRITE:
+									break;
+									case CRSF_FRAMETYPE_DEVICE_INFO:\
+									break;
+							}
+					}		
+				}
+			break;	
    }
 
 }
@@ -541,7 +596,52 @@ void CRSFReceived()
 			 	 memset(CRSF_RawData_4, 0, CRSF_MAX_PACKET_LEN);							   // 清除接收缓存							
 			}
 		 break ;
+		case CRSF_RX5_GET:      
+			//UART5
+		 { 		 
+				if(CRSF_RawData_5[0] == CRSF_ADDRESS_FLIGHT_CONTROLLER && 0x0E == (CRSF_RawData_5[1] + 0X02) \
+						&& CRSF_RawData_5[1] >= 3 && CRSF_RawData_5[1] <= CRSF_MAX_PACKET_LEN)//如果同步信号和长度正确
+				{
+						len = CRSF_RawData_5[1];                  //获取数据包长度
+						inCrc = CRSF_RawData_5[2 + len - 1];      //获取数据包校验码
+						crc= CalcCRC(&CRSF_RawData_5[2], len - 1);//计算数据包校验码
+						if (crc == inCrc)                      	  //验证校验码
+						{ 
+							ProcessPacketIn(len);
+						} 							  //校验通过，解析数据包
+						else  if(crc != inCrc)
+						{
+							memset(CRSF_RawData_5, 0, CRSF_MAX_PACKET_LEN);							   // 清除接收缓存							
+							break ;
+						}
 
+				}
+			 	 memset(CRSF_RawData_5, 0, CRSF_MAX_PACKET_LEN);							   // 清除接收缓存							
+			}
+		 break ;
+		case CRSF_RX6_GET:      
+			//UART6
+		 { 		 
+				if(CRSF_RawData_6[0] == CRSF_ADDRESS_FLIGHT_CONTROLLER && 0x0E == (CRSF_RawData_6[1] + 0X02) \
+						&& CRSF_RawData_6[1] >= 3 && CRSF_RawData_6[1] <= CRSF_MAX_PACKET_LEN)//如果同步信号和长度正确
+				{
+						len = CRSF_RawData_6[1];                  //获取数据包长度
+						inCrc = CRSF_RawData_6[2 + len - 1];      //获取数据包校验码
+						crc= CalcCRC(&CRSF_RawData_6[2], len - 1);//计算数据包校验码
+						if (crc == inCrc)                      	  //验证校验码
+						{ 
+							ProcessPacketIn(len);
+						} 							  //校验通过，解析数据包
+						else  if(crc != inCrc)
+						{
+							memset(CRSF_RawData_6, 0, CRSF_MAX_PACKET_LEN);							   // 清除接收缓存							
+							break ;
+						}
+
+				}
+			 	 memset(CRSF_RawData_6, 0, CRSF_MAX_PACKET_LEN);							   // 清除接收缓存							
+			}
+		 break ;
 	}
 
 
@@ -561,6 +661,14 @@ uint8_t Feed_RX_wdg(uint8_t Rx_Num)
 	{
 		RX3_online_flag=0;
 	}
+	else if(Rx_Num==5)
+	{
+		RX5_online_flag=0;
+	}
+	else if(Rx_Num==6)
+	{
+		RX6_online_flag=0;
+	}	
 }
 
 uint8_t RX_wdg()
@@ -568,6 +676,8 @@ uint8_t RX_wdg()
 	RX1_online_flag++;
 	RX2_online_flag++;
 	RX3_online_flag++;
+	RX5_online_flag++;
+	RX6_online_flag++;
 	if(RX1_online_flag>1000)//1s没更新则清空回传信息
 	{
 		memset(&RX1_telemtering, 0, sizeof(crsfLinkStatistics_t));
@@ -582,6 +692,16 @@ uint8_t RX_wdg()
 	{
 		memset(&RX3_telemtering, 0, sizeof(crsfLinkStatistics_t));
 		RX3_online_flag=1000;
+	}
+		if(RX5_online_flag>1000)
+	{
+		memset(&RX5_telemtering, 0, sizeof(crsfLinkStatistics_t));
+		RX5_online_flag=1000;
+	}
+		if(RX6_online_flag>1000)
+	{
+		memset(&RX6_telemtering, 0, sizeof(crsfLinkStatistics_t));
+		RX6_online_flag=1000;
 	}
 }
 
@@ -634,5 +754,29 @@ void  RX_4_DataDeal()
         HAL_UART_DMAStop(&huart4);
         CRSFReceived();
         HAL_UART_Receive_DMA(&huart4,CRSF_RawData_4, 67);
+    }
+}
+void  RX_5_DataDeal()
+{
+    if(__HAL_UART_GET_FLAG(&huart5,UART_FLAG_IDLE) == 1)
+    {
+			  
+         CRSF_RawData_Flag=CRSF_RX5_GET;//设置此标志位说明是串口4进入的中断
+        __HAL_UART_CLEAR_IDLEFLAG(&huart5);//接收后清除标志位
+        HAL_UART_DMAStop(&huart5);
+        CRSFReceived();
+        HAL_UART_Receive_DMA(&huart5,CRSF_RawData_5, 67);
+    }
+}
+void  RX_6_DataDeal()
+{
+    if(__HAL_UART_GET_FLAG(&huart6,UART_FLAG_IDLE) == 1)
+    {
+			  
+         CRSF_RawData_Flag=CRSF_RX6_GET;//设置此标志位说明是串口4进入的中断
+        __HAL_UART_CLEAR_IDLEFLAG(&huart6);//接收后清除标志位
+        HAL_UART_DMAStop(&huart6);
+        CRSFReceived();
+        HAL_UART_Receive_DMA(&huart6,CRSF_RawData_6, 67);
     }
 }

@@ -194,7 +194,7 @@ void StartDefaultTask(void const * argument)
 /* USER CODE BEGIN Application */
 void BaseTask_1_Fun(void const * argument)
 {
-		LCD_Init();
+	LCD_Init();
 	drawMainMenu();
 	HAL_Delay(300);
   for(;;)
