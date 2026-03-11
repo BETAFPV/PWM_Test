@@ -501,20 +501,20 @@ void RX_TEST_MANUL_Task_Fun(void const * argument)
 				}
 				else if((*current_rx_target&0x8000)==Normal_RX)
 				{
-										LCD_ShowNum_Color(55,20	,GREEN,WHITE,RX1_RSSI,3,16);
-					LCD_ShowNum_Color(135,20	,GREEN,WHITE,RX1_LQ_GET,3,16);
+										LCD_ShowNum_Color(55,20	,BROWN,WHITE,RX1_RSSI,3,16);
+					LCD_ShowNum_Color(135,20	,BROWN,WHITE,RX1_LQ_GET,3,16);
 					
-										LCD_ShowNum_Color(55,36	,GREEN,WHITE,RX2_RSSI,3,16);
-					LCD_ShowNum_Color(135,36	,GREEN,WHITE,RX2_LQ_GET,3,16);
+										LCD_ShowNum_Color(55,36	,BROWN,WHITE,RX2_RSSI,3,16);
+					LCD_ShowNum_Color(135,36	,BROWN,WHITE,RX2_LQ_GET,3,16);
 					
-										LCD_ShowNum_Color(55,56	,GREEN,WHITE,RX3_RSSI,3,16);
-					LCD_ShowNum_Color(135,56	,GREEN,WHITE,RX3_LQ_GET,3,16);
+										LCD_ShowNum_Color(55,56	,BROWN,WHITE,RX3_RSSI,3,16);
+					LCD_ShowNum_Color(135,56	,BROWN,WHITE,RX3_LQ_GET,3,16);
 					
-										LCD_ShowNum_Color(55,72	,GREEN,WHITE,RX5_RSSI,3,16);
-					LCD_ShowNum_Color(135,72	,GREEN,WHITE,RX5_LQ_GET,3,16);
+										LCD_ShowNum_Color(55,72	,BROWN,WHITE,RX5_RSSI,3,16);
+					LCD_ShowNum_Color(135,72	,BROWN,WHITE,RX5_LQ_GET,3,16);
 					
-										LCD_ShowNum_Color(55,92	,GREEN,WHITE,RX6_RSSI,3,16);
-					LCD_ShowNum_Color(135,92	,GREEN,WHITE,RX6_LQ_GET,3,16);
+										LCD_ShowNum_Color(55,92	,BROWN,WHITE,RX6_RSSI,3,16);
+					LCD_ShowNum_Color(135,92	,BROWN,WHITE,RX6_LQ_GET,3,16);
 //					LCD_ShowNum_Color(55,20	,GREEN,WHITE,RX1_telemtering,3,16);	
 //					RX1_telemtering.
 //					RX1_telemtering.
